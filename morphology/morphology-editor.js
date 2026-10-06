@@ -1,3 +1,24 @@
+/*
+=========================================
+DrugAssist
+
+Fájl:
+morphology-editor.js
+
+Feladata:
+Gyógyszer-morfológiai adatok (küllem, forma,
+szín) szerkesztőfelületének működtetése.
+
+Fejlesztő:
+Tarszabó Gergely + ChatGPT
+
+Verzió:
+2.0.0
+=========================================
+*/
+
+"use strict";
+
 let drugDatabase = [];
 
 let morphology = {};
@@ -6,14 +27,9 @@ let selectedDrug = null;
 
 //--------------------------------------------------
 
-document
-.getElementById("loadButton")
-.onclick = async () => {
+document.getElementById("loadButton").onclick = async () => {
 
-    const databaseFile =
-        document
-        .getElementById("databaseFile")
-        .files[0];
+    const databaseFile = document.getElementById("databaseFile")?.files[0];
 
     if (!databaseFile) {
 
@@ -29,9 +45,7 @@ document
             await databaseFile.text()
         );
 
-    }
-
-    catch {
+    } catch (error) {
 
         alert("Hibás drug-database.json!");
 
@@ -39,10 +53,7 @@ document
 
     }
 
-    const morphologyFile =
-        document
-        .getElementById("morphologyFile")
-        .files[0];
+    const morphologyFile = document.getElementById("morphologyFile")?.files[0];
 
     if (morphologyFile) {
 
@@ -52,9 +63,7 @@ document
                 await morphologyFile.text()
             );
 
-        }
-
-        catch {
+        } catch (error) {
 
             alert("Hibás drug-morphology.json!");
 
@@ -62,19 +71,27 @@ document
 
         }
 
-    }
-
-    else {
+    } else {
 
         morphology = {};
 
     }
 
-    document.getElementById("loader").style.display =
-        "none";
+    const loader = document.getElementById("loader");
 
-    document.getElementById("container").style.display =
-        "flex";
+    if (loader) {
+
+        loader.style.display = "none";
+
+    }
+
+    const container = document.getElementById("container");
+
+    if (container) {
+
+        container.style.display = "flex";
+
+    }
 
     renderList(drugDatabase);
 
@@ -84,20 +101,19 @@ document
 
 function renderList(list) {
 
-    const container =
-        document.getElementById("drugList");
+    const container = document.getElementById("drugList");
+
+    if (!container) return;
 
     container.innerHTML = "";
 
-    list.forEach(drug => {
+    (list || []).forEach(drug => {
 
-        const div =
-            document.createElement("div");
+        const div = document.createElement("div");
 
         div.className = "drug";
 
-        div.textContent =
-            drug.name;
+        div.textContent = drug.name || "Ismeretlen gyógyszer";
 
         div.onclick = () => {
 
@@ -123,105 +139,118 @@ function selectDrug(drug) {
 
     selectedDrug = drug;
 
-    document.getElementById("drugName").value =
-        drug.name || "";
+    const nameInput = document.getElementById("drugName");
 
-    document.getElementById("drugEAN").value =
-        drug.ean || "";
+    if (nameInput) {
 
-    const morph =
-        morphology[drug.ean];
+        nameInput.value = drug.name || "";
 
-    document.getElementById("description").value =
-        morph?.description || "";
+    }
+
+    const eanInput = document.getElementById("drugEAN");
+
+    if (eanInput) {
+
+        eanInput.value = drug.ean || "";
+
+    }
+
+    const morph = morphology[drug.ean];
+
+    const descInput = document.getElementById("description");
+
+    if (descInput) {
+
+        descInput.value = morph?.description || "";
+
+    }
 
 }
 
 //--------------------------------------------------
 
-document
-.getElementById("search")
-.addEventListener("input", e => {
+const searchInput = document.getElementById("search");
 
-    const text =
-        e.target.value.toLowerCase();
+if (searchInput) {
 
-    const filtered =
-        drugDatabase.filter(drug => {
+    searchInput.addEventListener("input", e => {
+
+        const text = e.target.value.toLowerCase();
+
+        const filtered = drugDatabase.filter(drug => {
 
             return (
                 (drug.name || "")
-                .toLowerCase()
-                .includes(text)
+                    .toLowerCase()
+                    .includes(text)
             );
 
         });
 
-    renderList(filtered);
+        renderList(filtered);
 
-});
+    });
+
+}
 
 //--------------------------------------------------
 
-document
-.getElementById("saveButton")
-.onclick = () => {
+const saveButton = document.getElementById("saveButton");
 
-    if (!selectedDrug) {
+if (saveButton) {
 
-        alert("Nincs kiválasztott gyógyszer!");
+    saveButton.onclick = () => {
 
-        return;
+        if (!selectedDrug) {
 
-    }
+            alert("Nincs kiválasztott gyógyszer!");
 
-    morphology[selectedDrug.ean] = {
+            return;
 
-        name:
-            selectedDrug.name,
+        }
 
-        description:
-            document
-            .getElementById("description")
-            .value
-            .trim()
+        const descElement = document.getElementById("description");
+
+        const descriptionText = descElement ? descElement.value.trim() : "";
+
+        morphology[selectedDrug.ean] = {
+
+            name: selectedDrug.name,
+
+            description: descriptionText
+
+        };
+
+        downloadMorphology();
 
     };
 
-    downloadMorphology();
-
-};
+}
 
 //--------------------------------------------------
 
 function downloadMorphology() {
 
-    const json =
-        JSON.stringify(
-            morphology,
-            null,
-            2
-        );
+    const json = JSON.stringify(
+        morphology,
+        null,
+        2
+    );
 
-    const blob =
-        new Blob(
-            [json],
-            {
-                type:
-                    "application/json"
-            }
-        );
+    const blob = new Blob(
+        [json],
+        {
+            type: "application/json"
+        }
+    );
 
-    const url =
-        URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
 
-    const a =
-        document.createElement("a");
+    const a = document.createElement("a");
 
     a.href = url;
 
-    a.download =
-        "drug-morphology.json";
+    a.download = "drug-morphology.json";
 
     document.body.appendChild(a);
 
