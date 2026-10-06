@@ -1,56 +1,107 @@
+/*
+=========================================
+DrugAssist
+
+Fájl:
+morphology.js
+
+Feladata:
+Gyógyszerek morfológiai leírásának
+(küllem, szín, forma) betöltése és keresése.
+
+Fejlesztő:
+Tarszabó Gergely + ChatGPT
+
+Verzió:
+2.0.0
+=========================================
+*/
+
 "use strict";
 
 const Morphology = (() => {
 
     let database = {};
 
-    async function load(){
+    async function load() {
 
-        const response =
-            await fetch("data/drug-morphology.json");
+        try {
 
-        database =
-            await response.json();
+            const response = await fetch("data/drug-morphology.json");
 
-    }
+            if (!response.ok) {
 
-    function getDescription(name){
+                // Ha a data/ mappában nem található, megpróbáljuk a gyökérben is
+                const rootResponse = await fetch("drug-morphology.json");
 
-    const search =
-        name.toUpperCase().trim();
+                if (rootResponse.ok) {
 
-    for(const item of Object.values(database)){
+                    database = await rootResponse.json();
 
-        const dbName =
-            item.name.toUpperCase().trim();
+                    return;
 
-        if(dbName === search){
+                }
 
-            return item.description || "";
+                console.warn("Morfológiai adatbázis nem található.");
 
-        }
+                return;
 
-        if(dbName.startsWith(search)){
+            }
 
-            return item.description || "";
+            database = await response.json();
 
-        }
+        } catch (error) {
 
-        if(search.startsWith(dbName)){
-
-            return item.description || "";
+            console.error("Hiba a morfológiai adatbázis betöltésekor:", error);
 
         }
 
     }
 
-    return "Ehhez a gyógyszerhez még nincs morfológia rögzítve.";
+    function getDescription(name) {
 
-}
+        if (!name) {
 
-    return{
+            return "Ehhez a gyógyszerhez még nincs morfológia rögzítve.";
+
+        }
+
+        const search = name.toUpperCase().trim();
+
+        for (const item of Object.values(database)) {
+
+            if (!item || !item.name) continue;
+
+            const dbName = item.name.toUpperCase().trim();
+
+            if (dbName === search) {
+
+                return item.description || "";
+
+            }
+
+            if (dbName.startsWith(search)) {
+
+                return item.description || "";
+
+            }
+
+            if (search.startsWith(dbName)) {
+
+                return item.description || "";
+
+            }
+
+        }
+
+        return "Ehhez a gyógyszerhez még nincs morfológia rögzítve.";
+
+    }
+
+    return {
 
         load,
+
         getDescription
 
     };
