@@ -17,8 +17,7 @@ Fejlesztő:
 Tarszabó Gergely + ChatGPT
 
 Verzió:
-1.1.0
-
+2.0.0
 =========================================
 */
 
@@ -32,45 +31,33 @@ const Render = {
 
     createStatusBadge(status) {
 
-        const badge =
-            document.createElement("span");
+        const badge = document.createElement("span");
 
-        badge.classList.add(
-            "status-badge"
-        );
+        badge.classList.add("status-badge");
 
         switch (status) {
 
             case CONFIG.status.NEW:
 
-                badge.classList.add(
-                    "status-new"
-                );
+                badge.classList.add("status-new");
 
-                badge.textContent =
-                    "⚪ Nincs elkezdve";
+                badge.textContent = "⚪ Nincs elkezdve";
 
                 break;
 
             case CONFIG.status.LABEL_PRINTED:
 
-                badge.classList.add(
-                    "status-progress"
-                );
+                badge.classList.add("status-progress");
 
-                badge.textContent =
-                    "🟡 Gyógyszerelés elkezdve";
+                badge.textContent = "🟡 Gyógyszerelés elkezdve";
 
                 break;
 
             case CONFIG.status.CHECKED:
 
-                badge.classList.add(
-                    "status-done"
-                );
+                badge.classList.add("status-done");
 
-                badge.textContent =
-                    "🟢 Lezárva";
+                badge.textContent = "🟢 Lezárva";
 
                 break;
 
@@ -80,8 +67,6 @@ const Render = {
 
     },
 
-
-
     /*
     =====================================
     Osztálykártya
@@ -90,94 +75,52 @@ const Render = {
 
     createWardCard(ward) {
 
-        const card =
-            document.createElement("div");
+        const card = document.createElement("div");
 
-        card.className =
-            "ward-card";
+        card.className = "ward-card";
 
-        const activePatients =
+        const activePatients = (ward.patients || []).filter(
+            patient => patient.onWard !== false
+        );
 
-            ward.patients.filter(
+        const total = (ward.patients || []).length;
 
-                patient => patient.onWard
-
-            );
-
-        const total =
-    ward.patients.length;
-
-        const completed =
-
-            activePatients.filter(
-
-                patient =>
-
-                    patient.status ===
-                    CONFIG.status.CHECKED
-
-            ).length;
+        const completed = activePatients.filter(
+            patient => patient.status === CONFIG.status.CHECKED
+        ).length;
 
         card.innerHTML = `
-
 <div class="ward-header">
-
     <div>
-
         <div class="ward-name">
-
             ${ward.wardName}
-
         </div>
-
         <div class="ward-count">
-
             ${total} beteg
-
         </div>
-
         <div class="ward-date">
-
             ${ward.importDate || ""}
-
         </div>
-
     </div>
-
     <div class="completion">
-
         ✔ ${completed} / ${total}
-
     </div>
-
 </div>
-
 `;
 
-        card.addEventListener(
+        card.addEventListener("click", async () => {
 
-            "click",
-
-            () => {
-
-                Storage.saveCurrentWard(
-
-                    ward.wardCode
-
-                );
-
-                window.location.href =
-                    "ward.html";
-
+            if (Storage.saveCurrentWard) {
+                await Storage.saveCurrentWard(ward.wardCode);
             }
 
-        );
+            window.location.href = "ward.html";
+
+        });
 
         return card;
 
     },
-
-
 
     /*
     =====================================
@@ -187,76 +130,42 @@ const Render = {
 
     createPatientCard(patient) {
 
-        const card =
-            document.createElement("div");
+        const card = document.createElement("div");
 
-        card.className =
-            "patient-card";
+        card.className = "patient-card";
 
         card.innerHTML = `
-
 <h3>
-
     ${patient.name}
-
 </h3>
-
 <div>
-
-    ${patient.wardName}
-
+    ${patient.wardName || ""}
 </div>
-
 <div>
-
-    Ágy:
-    ${patient.bed}
-
+    Ágy: ${patient.bed || "-"}
 </div>
-
 <div>
-
-    Azonosító:
-    ${patient.patientId}
-
+    Azonosító: ${patient.patientId || "-"}
 </div>
-
 `;
 
         card.appendChild(
-
-            this.createStatusBadge(
-
-                patient.status
-
-            )
-
+            this.createStatusBadge(patient.status)
         );
 
-        card.addEventListener(
+        card.addEventListener("click", async () => {
 
-            "click",
-
-            () => {
-
-                Storage.saveCurrentPatient(
-
-                    patient.patientId
-
-                );
-
-                window.location.href =
-                    "patient.html";
-
+            if (Storage.saveCurrentPatient) {
+                await Storage.saveCurrentPatient(patient.patientId);
             }
 
-        );
+            window.location.href = "patient.html";
+
+        });
 
         return card;
 
     },
-
-
 
     /*
     =====================================
@@ -266,10 +175,7 @@ const Render = {
 
     renderWardCards(wards) {
 
-        const container =
-            document.getElementById(
-                "wardContainer"
-            );
+        const container = document.getElementById("wardContainer");
 
         if (!container) {
 
@@ -279,16 +185,12 @@ const Render = {
 
         container.innerHTML = "";
 
-        if (!wards.length) {
+        if (!wards || !wards.length) {
 
             container.innerHTML = `
-
 <div class="empty">
-
 Nincs betöltött osztály.
-
 </div>
-
 `;
 
             return;
@@ -297,15 +199,9 @@ Nincs betöltött osztály.
 
         wards.forEach(ward => {
 
-            const card =
+            const card = this.createWardCard(ward);
 
-                this.createWardCard(
-                    ward
-                );
-
-            container.appendChild(
-                card
-            );
+            container.appendChild(card);
 
         });
 
