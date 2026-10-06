@@ -9,10 +9,10 @@ Feladata:
 A dashboard működése (Supabase adatbázis integrációval).
 
 Fejlesztő:
-Tarszabó Gergely + ChatGPT
+Tarszabó Gergely + ChatGPT + Gemini
 
 Verzió:
-2.0.0
+2.1.0
 =========================================
 */
 
@@ -61,9 +61,7 @@ async function handlePdfImport(event) {
     const file = event.target.files[0];
 
     if (!file) {
-
         return;
-
     }
 
     Utils.log("PDF kiválasztva:", file.name);
