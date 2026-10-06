@@ -13,31 +13,36 @@ const Storage = {
     // =========================================================
 
     // Osztályok és betegeik betöltése Supabase-ből (vagy helyi tárolóból)
-    // js/storage.js - loadWards metódus eleje:
-async loadWards() {
-    const isSupabaseReady = typeof supabase !== "undefined" && 
-                            supabase && 
-                            typeof supabase.from === "function" &&
-                            !CONFIG.supabase.url.includes("YOUR_SUPABASE");
+    async loadWards() {
+        const isSupabaseReady = typeof supabase !== "undefined" && 
+                                supabase && 
+                                typeof supabase.from === "function" &&
+                                typeof CONFIG !== "undefined" &&
+                                CONFIG.supabase?.url &&
+                                !CONFIG.supabase.url.includes("YOUR_SUPABASE");
 
-    if (isSupabaseReady) {
-        try {
-            const { data, error } = await supabase
-                .from('wards')
-                .select('*');
+        if (isSupabaseReady) {
+            try {
+                const { data, error } = await supabase
+                    .from('wards')
+                    .select('*');
 
-            if (!error && data && data.length > 0) {
-                return data;
+                if (error) {
+                    console.error("Hiba a Supabase osztályok lekérésekor:", error);
+                } else if (data) {
+                    // Ha a Supabase-ből sikeresen jött válasz (akár üres, akár tele), azt használjuk!
+                    Utils.log("Osztályok sikeresen betöltve Supabase-ből:", data.length, "db osztály");
+                    return data;
+                }
+            } catch (err) {
+                console.warn("Supabase osztálybetöltési hiba, váltás helyi tárolóra:", err);
             }
-        } catch (err) {
-            console.warn("Supabase osztálybetöltési hiba, váltás helyi tárolóra:", err);
         }
-    }
 
-    // Fallback LocalStorage-ra
-    const localData = localStorage.getItem(CONFIG.storage.WARDS);
-    return localData ? JSON.parse(localData) : [];
-},
+        // Fallback LocalStorage-ra (csak ha a Supabase egyáltalán nem elérhető)
+        const localData = localStorage.getItem(CONFIG.storage.WARDS);
+        return localData ? JSON.parse(localData) : [];
+    },
 
     // PDF Import után osztály összefésülése/mentése
     async mergeWard(wardData) {
