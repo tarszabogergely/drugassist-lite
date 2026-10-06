@@ -6,66 +6,53 @@ Fájl:
 dashboard.js
 
 Feladata:
-A dashboard működése.
+A dashboard működése (Supabase adatbázis integrációval).
 
 Fejlesztő:
 Tarszabó Gergely + ChatGPT
 
 Verzió:
-1.0.0
+2.0.0
 =========================================
 */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
     // Ideiglenes tesztfelhasználó
     // A login elkészülésekor ezt töröljük.
+    if (Storage.saveUser) {
+        await Storage.saveUser({
+            id: "G03",
+            name: "Tarszabó Gergely"
+        });
+    }
 
-    Storage.saveUser({
+    const today = Utils.getToday();
+    const workDate = Storage.loadWorkDate ? await Storage.loadWorkDate() : null;
 
-        id: "G03",
-
-        name: "Tarszabó Gergely"
-
-    });
-
-const today =
-    Utils.getToday();
-
-const workDate =
-    Storage.loadWorkDate();
-
-if (workDate !== today) {
-
-    Storage.clearWards();
-
-    Storage.saveWorkDate(
-        today
-    );
-
-}
+    if (workDate !== today) {
+        if (Storage.clearWards) {
+            await Storage.clearWards();
+        }
+        if (Storage.saveWorkDate) {
+            await Storage.saveWorkDate(today);
+        }
+    }
 
     const pdfInput = document.getElementById("pdfInput");
 
-    if (!pdfInput) {
-
+    if (pdfInput) {
+        pdfInput.addEventListener("change", handlePdfImport);
+    } else {
         Utils.log("Nem található a pdfInput.");
-
-        return;
-
     }
-
-    pdfInput.addEventListener("change", handlePdfImport);
 
     Utils.log("Dashboard betöltve.");
 
-const wards =
+    // Osztályok aszinkron betöltése Supabase-ből
+    const wards = await Storage.loadWards();
 
-    Storage.loadWards();
-
-Render.renderWardCards(
-    wards
-);
+    Render.renderWardCards(wards);
 
 });
 
@@ -85,27 +72,24 @@ async function handlePdfImport(event) {
 
         const ward = await PdfImport.importWardPdf(file);
 
-Storage.mergeWard(ward);
+        if (Storage.mergeWard) {
+            await Storage.mergeWard(ward);
+        }
 
-const wards =
+        const wards = await Storage.loadWards();
 
-    Storage.loadWards();
+        Render.renderWardCards(wards);
 
-Render.renderWardCards(
-    wards
-);
-
-Utils.log(
-    "Osztály betöltve:",
-    ward.wardName
-);
-
+        Utils.log(
+            "Osztály betöltve:",
+            ward.wardName
+        );
 
     }
 
     catch (error) {
 
-        console.error(error);
+        console.error("Hiba a PDF importálása során:", error);
 
     }
 
