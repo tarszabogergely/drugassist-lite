@@ -122,3 +122,8 @@ const CONFIG = {
     }
 
 };
+
+// Supabase klienspéldány inicializálása
+if (typeof supabase !== "undefined" && supabase.createClient) {
+    window.supabase = supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
+}
