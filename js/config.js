@@ -2,21 +2,20 @@
 =========================================
 DrugAssist
 
+Fájl:
 config.js
 
-Projekt beállításai
+Feladata:
+Projekt beállításai és konfig adatai.
 
 Fejlesztő:
 Tarszabó Gergely + ChatGPT
 
 Verzió:
-1.0.0
+2.0.0
 
 A fájl kizárólag konfigurációs adatokat
-tartalmaz.
-
-Programlogika nem kerülhet bele.
-
+tartalmaz. Programlogika nem kerülhet bele.
 =========================================
 */
 
@@ -26,9 +25,19 @@ const CONFIG = {
 
     appName: "DrugAssist",
 
-    version: "1.0.0",
+    version: "2.0.0",
 
     developer: "Tarszabó Gergely + ChatGPT",
+
+    // ----- Supabase adatbázis beállítások -----
+
+    supabase: {
+
+        url: "https://YOUR_SUPABASE_PROJECT_URL.supabase.co",
+
+        anonKey: "YOUR_SUPABASE_ANON_KEY"
+
+    },
 
     // ----- Címke -----
 
@@ -58,7 +67,7 @@ const CONFIG = {
 
     },
 
-    // ----- LocalStorage -----
+    // ----- Helyi munkamenet és tároló kulcsok -----
 
     storage: {
 
@@ -81,10 +90,15 @@ const CONFIG = {
     doseTimes: [
 
         "Éjjel",
+
         "Hajnal",
+
         "Reggel",
+
         "Dél",
+
         "Délután",
+
         "Este"
 
     ],
@@ -93,7 +107,7 @@ const CONFIG = {
 
     pdf: {
 
-        worker: "js/pdf.worker.min.js"
+        worker: "pdf.worker.min.js"
 
     },
 
