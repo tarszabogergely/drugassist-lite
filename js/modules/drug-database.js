@@ -6,7 +6,7 @@ Fájl:
 drug-database.js
 
 Feladata:
-Gyógyszertörzs kezelése.
+Gyógyszertörzs kezelése és indexelése.
 
 Fejlesztő:
 Tarszabó Gergely + ChatGPT
@@ -26,42 +26,41 @@ const DrugDatabase = {
 
     bySubstance: new Map(),
 
-   /*
-=====================================
-CSV betöltése
-=====================================
-*/
+    /*
+    =====================================
+    CSV betöltése
+    =====================================
+    */
 
-async load(file) {
+    async load(file) {
 
-    const text =
-        await file.text();
+        const text = await file.text();
 
-    this.drugs =
-        this.parseCsv(text);
+        this.drugs = this.parseCsv(text);
 
-    this.buildIndexes();
+        this.buildIndexes();
 
-},
+    },
 
-/*
-=====================================
-Név normalizálása
-=====================================
-*/
+    /*
+    =====================================
+    Név normalizálása
+    =====================================
+    */
 
-normalizeName(name) {
+    normalizeName(name) {
 
-    return name
+        if (!name) return "";
 
-        .trim()
+        return name
 
-        .replace(/\s+/g, " ")
+            .trim()
 
-        .toUpperCase();
+            .replace(/\s+/g, " ")
 
-},
+            .toUpperCase();
 
+    },
 
     /*
     =====================================
@@ -71,48 +70,36 @@ normalizeName(name) {
 
     parseCsv(text) {
 
-    const rows =
-        text
-            .trim()
-            .split(/\r?\n/);
+        const rows = text.trim().split(/\r?\n/);
 
-    // fejléc kihagyása
-    rows.shift();
+        // Fejléc kihagyása
+        rows.shift();
 
-    const drugs = [];
+        const drugs = [];
 
-    rows.forEach(row => {
+        rows.forEach(row => {
 
-        if (!row.trim()) {
+            if (!row.trim()) return;
 
-            return;
+            const cols = row.split(";");
 
-        }
+            drugs.push({
 
-        const cols =
-            row.split(";");
+                ean: cols[0]?.trim() || "",
 
-        drugs.push({
+                name: cols[1]?.trim() || "",
 
-            ean:
-                cols[0].trim(),
+                substance: cols[2]?.trim() || "",
 
-            name:
-                cols[1].trim(),
+                active: cols[3]?.trim() === "1"
 
-            substance:
-                cols[2].trim(),
-
-            active:
-                cols[3].trim() === "1"
+            });
 
         });
 
-    });
+        return drugs;
 
-    return drugs;
-
-},
+    },
 
     /*
     =====================================
@@ -126,53 +113,54 @@ normalizeName(name) {
 
     },
 
-/*
-=====================================
-Indexek felépítése
-=====================================
-*/
+    /*
+    =====================================
+    Indexek felépítése
+    =====================================
+    */
 
-buildIndexes() {
+    buildIndexes() {
 
-    this.byName.clear();
+        this.byName.clear();
 
-    this.byEan.clear();
+        this.byEan.clear();
 
-    this.bySubstance.clear();
+        this.bySubstance.clear();
 
-    this.drugs.forEach(drug => {
+        this.drugs.forEach(drug => {
 
-        this.byName.set(
+            if (!drug) return;
 
-    this.normalizeName(
-        drug.name
-    ),
+            if (drug.name) {
 
-    drug
+                this.byName.set(
+                    this.normalizeName(drug.name),
+                    drug
+                );
 
-);
+            }
 
-        this.byEan.set(
-            drug.ean,
-            drug
-        );
+            if (drug.ean) {
 
-        if (!this.bySubstance.has(drug.substance)) {
+                this.byEan.set(drug.ean, drug);
 
-            this.bySubstance.set(
-                drug.substance,
-                []
-            );
+            }
 
-        }
+            if (drug.substance) {
 
-        this.bySubstance
-            .get(drug.substance)
-            .push(drug);
+                if (!this.bySubstance.has(drug.substance)) {
 
-    });
+                    this.bySubstance.set(drug.substance, []);
 
-},
+                }
+
+                this.bySubstance.get(drug.substance).push(drug);
+
+            }
+
+        });
+
+    },
 
     /*
     =====================================
@@ -182,13 +170,11 @@ buildIndexes() {
 
     findByName(name) {
 
-    return this.byName.get(
+        if (!name) return null;
 
-    this.normalizeName(name)
+        return this.byName.get(this.normalizeName(name)) || null;
 
-) || null;
-
-},
+    },
 
     /*
     =====================================
@@ -198,21 +184,23 @@ buildIndexes() {
 
     findByEan(ean) {
 
-    return this.byEan.get(ean) || null;
+        if (!ean) return null;
 
-},
+        return this.byEan.get(ean) || null;
 
-/*
-=====================================
-Keresés GTIN alapján
-=====================================
-*/
+    },
 
-findByGTIN(gtin) {
+    /*
+    =====================================
+    Keresés GTIN alapján
+    =====================================
+    */
 
-    return this.findByEan(gtin);
+    findByGTIN(gtin) {
 
-},
+        return this.findByEan(gtin);
+
+    },
 
     /*
     =====================================
@@ -222,9 +210,11 @@ findByGTIN(gtin) {
 
     findBySubstance(substance) {
 
-    return this.bySubstance.get(substance) || [];
+        if (!substance) return [];
 
-},
+        return this.bySubstance.get(substance) || [];
+
+    },
 
     /*
     =====================================
@@ -234,112 +224,157 @@ findByGTIN(gtin) {
 
     findActiveBySubstance(substance) {
 
-    return this.findBySubstance(substance)
+        return this.findBySubstance(substance).filter(drug => drug.active);
 
-        .filter(drug => drug.active);
+    },
 
-},
+    /*
+    =====================================
+    Helyettesíthető?
+    =====================================
+    */
 
-/*
-=====================================
-Helyettesíthető?
-=====================================
-*/
+    canSubstitute(substance) {
 
-canSubstitute(substance) {
+        return this.findActiveBySubstance(substance).length > 1;
 
-    return this
-        .findActiveBySubstance(substance)
-        .length > 1;
+    },
 
-},
+    /*
+    =====================================
+    JSON betöltése (helyi fájlból)
+    =====================================
+    */
 
-/*
-=====================================
-JSON betöltése
-=====================================
-*/
+    async loadJson(path) {
 
-async loadJson(path) {
+        try {
 
-    const response =
-        await fetch(path);
+            const response = await fetch(path);
 
-    this.drugs =
-        await response.json();
+            if (!response.ok) {
 
-    this.buildIndexes();
+                throw new Error(`Nem sikerült betölteni: ${path}`);
 
-},
+            }
 
-/*
-=====================================
-Gyógyszerek adatainak hozzárendelése
-=====================================
-*/
+            this.drugs = await response.json();
 
-attachData(medications) {
+            this.buildIndexes();
 
-    medications.forEach(med => {
+        } catch (error) {
 
-        const drug =
-
-            this.findByName(
-
-                med.medication
-
-            );
-
-        if (!drug) {
-
-            med.found = false;
-
-            return;
+            console.warn(`Hiba a törzs betöltésekor (${path}):`, error);
 
         }
 
-        med.found = true;
+    },
 
-        med.ean =
-            drug.ean;
+    /*
+    =====================================
+    Betöltés Supabase adatbázisból
+    =====================================
+    */
 
-        med.substance =
-            drug.substance;
+    async loadFromSupabase() {
 
-        med.active =
-            drug.active;
+        if (typeof supabase === "undefined" || !supabase) return false;
 
-        med.alternatives =
+        try {
 
-            this.findActiveBySubstance(
+            const { data, error } = await supabase
 
-                drug.substance
+                .from('drug_database')
 
-            );
+                .select('*');
 
-        med.canSubstitute =
+            if (error || !data) {
 
-            med.alternatives.length > 1;
+                console.error("Hiba a Supabase gyógyszertörzs lekérdezésekor:", error);
 
-    });
+                return false;
 
-},
+            }
 
-/*
-=====================================
-Inicializálás
-=====================================
-*/
+            this.drugs = data;
 
-async init() {
+            this.buildIndexes();
 
-    await this.loadJson(
+            return true;
 
-        "data/drug-database.json"
+        } catch (err) {
 
-    );
+            console.error("Supabase csatlakozási hiba a törzsnél:", err);
 
-}
+            return false;
 
+        }
+
+    },
+
+    /*
+    =====================================
+    Gyógyszerek adatainak hozzárendelése
+    =====================================
+    */
+
+    attachData(medications) {
+
+        if (!Array.isArray(medications)) return;
+
+        medications.forEach(med => {
+
+            const drug = this.findByName(med.medication);
+
+            if (!drug) {
+
+                med.found = false;
+
+                return;
+
+            }
+
+            med.found = true;
+
+            med.ean = drug.ean;
+
+            med.substance = drug.substance;
+
+            med.active = drug.active;
+
+            med.alternatives = this.findActiveBySubstance(drug.substance);
+
+            med.canSubstitute = med.alternatives.length > 1;
+
+        });
+
+    },
+
+    /*
+    =====================================
+    Inicializálás
+    =====================================
+    */
+
+    async init() {
+
+        // Elsőként próbáljuk meg a Supabase-t, ha nincs, akkor a JSON-t
+        const loadedFromDb = await this.loadFromSupabase();
+
+        if (!loadedFromDb) {
+
+            try {
+
+                await this.loadJson("data/drug-database.json");
+
+            } catch (e) {
+
+                await this.loadJson("drug-database.json");
+
+            }
+
+        }
+
+    }
 
 };
