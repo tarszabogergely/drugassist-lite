@@ -268,6 +268,14 @@ input[type=file]{
 
 <script src="js/config.js"></script>
 
+<!-- Supabase Kliens Inicializálása (megelőzi a supabase.from hibát) -->
+<script>
+  if (typeof supabase === 'undefined' && window.supabase) {
+    // Ha a CDN betöltötte a Supabase-t, létrehozzuk a klienst
+    window.supabase = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
+  }
+</script>
+
 <script src="js/utils.js"></script>
 
 <script src="js/storage.js"></script>
@@ -275,6 +283,9 @@ input[type=file]{
 <script src="js/render.js"></script>
 
 <script src="js/pdf.min.js"></script>
+
+<!-- A hiányzó parser modulok -->
+<script src="modules/dm-parser.js"></script>
 
 <script src="js/departments.js"></script>
 
