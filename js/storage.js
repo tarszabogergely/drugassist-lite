@@ -13,25 +13,31 @@ const Storage = {
     // =========================================================
 
     // Osztályok és betegeik betöltése Supabase-ből (vagy helyi tárolóból)
-    async loadWards() {
-        if (typeof supabase !== "undefined" && supabase) {
-            try {
-                const { data, error } = await supabase
-                    .from('wards')
-                    .select('*');
+    // js/storage.js - loadWards metódus eleje:
+async loadWards() {
+    const isSupabaseReady = typeof supabase !== "undefined" && 
+                            supabase && 
+                            typeof supabase.from === "function" &&
+                            !CONFIG.supabase.url.includes("YOUR_SUPABASE");
 
-                if (!error && data && data.length > 0) {
-                    return data;
-                }
-            } catch (err) {
-                console.warn("Supabase osztálybetöltési hiba, váltás helyi tárolóra:", err);
+    if (isSupabaseReady) {
+        try {
+            const { data, error } = await supabase
+                .from('wards')
+                .select('*');
+
+            if (!error && data && data.length > 0) {
+                return data;
             }
+        } catch (err) {
+            console.warn("Supabase osztálybetöltési hiba, váltás helyi tárolóra:", err);
         }
+    }
 
-        // Fallback LocalStorage-ra
-        const localData = localStorage.getItem(CONFIG.storage.WARDS);
-        return localData ? JSON.parse(localData) : [];
-    },
+    // Fallback LocalStorage-ra
+    const localData = localStorage.getItem(CONFIG.storage.WARDS);
+    return localData ? JSON.parse(localData) : [];
+},
 
     // PDF Import után osztály összefésülése/mentése
     async mergeWard(wardData) {
