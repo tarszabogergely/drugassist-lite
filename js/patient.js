@@ -6,13 +6,14 @@ Fájl:
 patient.js
 
 Feladata:
-Az aktuális beteg betöltése.
+Az aktuális beteg betöltése és kezelése
+(Supabase adatbázis integrációval).
 
 Fejlesztő:
 Tarszabó Gergely + ChatGPT
 
 Verzió:
-1.0.0
+1.1.0
 =========================================
 */
 
@@ -25,74 +26,56 @@ async function init() {
 
     await DrugDatabase.init();
 
-    loadPatient();
+    await loadPatient();
 
     SubstitutionModal.init();
 
     DmInput.init(
 
-    code => {
+        async code => {
 
-        const dm =
-            DmParser.parse(code);
+            const dm = DmParser.parse(code);
 
-        const drug =
-            DrugDatabase.findByGTIN(
-                dm.gtin
-            );
+            const drug = DrugDatabase.findByGTIN(dm.gtin);
 
-        if (!drug) {
+            if (!drug) {
 
-            alert(
-                "Ismeretlen gyógyszer!"
-            );
+                alert("Ismeretlen gyógyszer!");
 
-            return;
+                return;
+
+            }
+
+            console.log("Felismert gyógyszer:", drug.name);
+
+            await assignScannedDrug(drug, dm);
 
         }
 
-        console.log(
-            "Felismert gyógyszer:",
-            drug.name
-        );
+    );
 
-        assignScannedDrug(
-            drug,
-            dm
-        );
+    DmInput.focus();
+    initCloseMedication();
+
+}
+
+async function assignScannedDrug(drug, dm) {
+
+    if (await isPatientClosed()) {
+
+        return;
 
     }
 
-);
+    const patient = await Storage.loadPatient();
 
-DmInput.focus();
-initCloseMedication();
+    if (!patient) {
 
-}
+        return;
 
-function assignScannedDrug(
-    drug,
-    dm
-) {
-
-    
-if (isPatientClosed()) {
-
-    return;
-
-}
-
-const patient =
-    Storage.loadPatient();
-
-if (!patient) {
-
-    return;
-
-}
+    }
 
     // Előző aktív gyógyszer lezárása
-
     patient.medications.forEach(med => {
 
         if (med.status === "active") {
@@ -104,21 +87,17 @@ if (!patient) {
     });
 
     // Következő megfelelő gyógyszer keresése
+    const medication = patient.medications.find(med =>
 
-    const medication =
-        patient.medications.find(med =>
+        med.ean === drug.ean &&
 
-            med.ean === drug.ean &&
+        med.status !== "completed"
 
-            med.status !== "completed"
-
-        );
+    );
 
     if (!medication) {
 
-        alert(
-            "Ehhez a beteghez nincs ilyen gyógyszer."
-        );
+        alert("Ehhez a beteghez nincs ilyen gyógyszer.");
 
         return;
 
@@ -130,26 +109,21 @@ if (!patient) {
 
     medication.expiry = dm.expiry;
 
-    Storage.savePatient(patient);
+    await Storage.savePatient(patient);
 
-    renderMedications(
-        patient.medications
-    );
-
+    renderMedications(patient.medications);
 
 }
 
-function loadPatient() {
+async function loadPatient() {
 
-    const patient =
-        Storage.loadPatient();
+    const patient = await Storage.loadPatient();
 
     if (!patient) {
 
         alert("Nincs kiválasztott beteg.");
 
-        window.location.href =
-            "ward.html";
+        window.location.href = "ward.html";
 
         return;
 
@@ -162,38 +136,25 @@ function loadPatient() {
     }
 
     // Készítési azonosító létrehozása első megnyitáskor
-
     if (!patient.preparation) {
 
-    patient.preparation =
-        Preparation.create();
+        patient.preparation = Preparation.create();
 
-    if (
-        patient.status ===
-        CONFIG.status.NEW
-    ) {
+        if (patient.status === CONFIG.status.NEW) {
 
-        patient.status =
-            CONFIG.status.LABEL_PRINTED;
+            patient.status = CONFIG.status.LABEL_PRINTED;
+
+        }
 
     }
 
-}
+    await Storage.savePatient(patient);
 
-    Storage.savePatient(
-        patient
-    );
+    renderPatient(patient);
 
-    renderPatient(
-        patient
-    );
+    await initPatientNote();
 
-initPatientNote();
-
-    const pdfInput =
-        document.getElementById(
-            "patientPdfInput"
-        );
+    const pdfInput = document.getElementById("patientPdfInput");
 
     if (pdfInput) {
 
@@ -204,116 +165,72 @@ initPatientNote();
 
     }
 
-    renderMedications(
+    renderMedications(patient.medications || []);
 
-    patient.medications || []
+    if (patient.closed) {
 
-);
+        setReadOnlyMode();
 
-if (patient.closed) {
-
-    setReadOnlyMode();
+    }
 
 }
-
-}
-
-
 
 function renderPatient(patient) {
 
-    document.getElementById(
-        "patientName"
-    ).textContent =
-        patient.name;
+    document.getElementById("patientName").textContent = patient.name;
 
-    document.getElementById(
-        "patientId"
-    ).textContent =
-        patient.patientId;
+    document.getElementById("patientId").textContent = patient.patientId;
 
-    document.getElementById(
-        "patientWard"
-    ).textContent =
-        patient.wardName;
+    document.getElementById("patientWard").textContent = patient.wardName;
 
-    document.getElementById(
-        "patientBed"
-    ).textContent =
-        patient.bed;
+    document.getElementById("patientBed").textContent = patient.bed;
 
     // Készítési azonosító
-
-    document.getElementById(
-        "preparationId"
-    ).textContent =
-
-        patient.preparation ?
-
-        patient.preparation.id :
-
-        "-";
+    document.getElementById("preparationId").textContent =
+        patient.preparation ? patient.preparation.id : "-";
 
     // Címkenyomtatás
-
-    document.getElementById(
-        "printLabelButton"
-    ).onclick = () => {
+    document.getElementById("printLabelButton").onclick = () => {
 
         Label.print(patient);
 
     };
 
     // PDF ellenőrzés jelzése
+    const verified = document.getElementById("patientVerified");
 
-const verified =
-    document.getElementById(
-        "patientVerified"
-    );
-
-verified.innerHTML =
-
-    patient.pdfVerified
-
+    verified.innerHTML = patient.pdfVerified
         ? "<span class='verified'>✔</span>"
-
         : "";
 
 }
 
-function normalizeName(name){
+function normalizeName(name) {
 
     return name
-
         .normalize("NFD")
-
-        .replace(/[\u0300-\u036f]/g,"")
-
-        .replace(/\s+/g," ")
-
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, " ")
         .toUpperCase()
-
         .trim();
 
 }
 
-function canVerifyPatientName(name){
+function canVerifyPatientName(name) {
 
     return !/[őűŐŰ]/.test(name);
 
 }
 
+async function handlePatientPdf(event) {
 
-    async function handlePatientPdf(event) {
-
-    if (isPatientClosed()) {
+    if (await isPatientClosed()) {
 
         return;
 
     }
 
-    const file =
-        event.target.files[0];
+    const file = event.target.files[0];
 
     if (!file) {
 
@@ -321,72 +238,47 @@ function canVerifyPatientName(name){
 
     }
 
-    const patient =
-        Storage.loadPatient();
+    const patient = await Storage.loadPatient();
 
-    const result =
-        await PatientPdfParser.parse(file);
+    const result = await PatientPdfParser.parse(file);
 
-
-if (!canVerifyPatientName(patient.name)) {
-
-    patient.pdfVerified = false;
-
-    Storage.savePatient(
-        patient
-    );
-
-
-    renderPatient(
-        patient
-    );
-
-    alert(
-    "Automatikus betegazonosítás nem végezhető el ennél a betegnél.\n\nA gyógyszerelési PDF betöltése folytatódik.\n\nKérjük, ellenőrizze manuálisan, hogy a megfelelő dokumentumot választotta ki."
-);
-
-}
-else {
-
-    const pdfOk =
-
-        normalizeName(
-            result.pdfText
-        ).includes(
-
-            normalizeName(
-                patient.name
-            )
-
-        );
-
-    if (!pdfOk) {
+    if (!canVerifyPatientName(patient.name)) {
 
         patient.pdfVerified = false;
 
-        Storage.savePatient(
-            patient
-        );
+        await Storage.savePatient(patient);
 
-        renderPatient(
-            patient
-        );
+        renderPatient(patient);
 
         alert(
-            "⚠ A kiválasztott PDF nem ehhez a beteghez tartozik!"
+            "Automatikus betegazonosítás nem végezhető el ennél a betegnél.\n\nA gyógyszerelési PDF betöltése folytatódik.\n\nKérjük, ellenőrizze manuálisan, hogy a megfelelő dokumentumot választotta ki."
         );
 
-        return;
+    } else {
+
+        const pdfOk = normalizeName(result.pdfText).includes(
+            normalizeName(patient.name)
+        );
+
+        if (!pdfOk) {
+
+            patient.pdfVerified = false;
+
+            await Storage.savePatient(patient);
+
+            renderPatient(patient);
+
+            alert("⚠ A kiválasztott PDF nem ehhez a beteghez tartozik!");
+
+            return;
+
+        }
+
+        patient.pdfVerified = true;
 
     }
 
-    patient.pdfVerified = true;
-
-}
-
-
-patient.medications =
-    result.medications.map(med => ({
+    patient.medications = result.medications.map(med => ({
 
         ...med,
 
@@ -398,20 +290,13 @@ patient.medications =
 
     }));
 
-Storage.savePatient(
-    patient
-);
+    await Storage.savePatient(patient);
 
-renderPatient(
-    patient
-);
+    renderPatient(patient);
 
-renderMedications(
-    patient.medications
-);
+    renderMedications(patient.medications);
 
 }
-
 
 /*
 =====================================
@@ -419,16 +304,13 @@ Gyógyszerek megjelenítése
 =====================================
 */
 
-function renderMedications(medications){
+function renderMedications(medications) {
 
-    const container =
-        document.getElementById(
-            "medicationList"
-        );
+    const container = document.getElementById("medicationList");
 
     container.innerHTML = "";
 
-    if(!medications.length){
+    if (!medications.length) {
 
         container.innerHTML =
             "<div class='empty'>Nincs gyógyszer.</div>";
@@ -438,20 +320,17 @@ function renderMedications(medications){
     }
 
     const periods = [
-
         "Éjjel",
         "Hajnal",
         "Reggel",
         "Dél",
         "Délután",
         "Este"
-
     ];
 
-    medications.forEach((med,index)=>{
+    medications.forEach((med, index) => {
 
-        const card =
-            document.createElement("div");
+        const card = document.createElement("div");
 
         card.className = "medication-card";
 
@@ -471,111 +350,52 @@ function renderMedications(medications){
 
         let schedule = "";
 
-        periods.forEach(period=>{
+        periods.forEach(period => {
 
             schedule += `
-
 <div class="period">
-
 <div class="period-name">
-
 ${period}
-
 </div>
-
 <div class="period-dose">
-
 ${med.schedule[period] || ""}
-
 </div>
-
 </div>
-
 `;
 
         });
 
         card.innerHTML = `
-
 <div class="medication-info">
-
     <div class="medication-name-row">
-
         ${med.canSubstitute
-    ? `
-<span
-class="swap-button"
-data-index="${index}">
-
-🔄
-
-</span>
-`
-    : ""
-}
-
+            ? `<span class="swap-button" data-index="${index}">🔄</span>`
+            : ""
+        }
         <span class="medication-name">
-
             ${med.medication}
-
         </span>
-
         <span class="status-icon">
-
             ${med.status === "completed" ? "✅" : ""}
-
         </span>
-
     </div>
-
 </div>
-
 <div class="lot-column">
-
-    <div class="lot-item">
-
-        📦 
-
-    </div>
-
-    <div class="lot-value">
-
-        ${med.lot || "-"}
-
-    </div>
-
-    <div class="lot-item">
-
-        📅 
-
-    </div>
-
-    <div class="lot-value">
-
-        ${med.expiry || "-"}
-
-    </div>
-
+    <div class="lot-item">📦</div>
+    <div class="lot-value">${med.lot || "-"}</div>
+    <div class="lot-item">📅</div>
+    <div class="lot-value">${med.expiry || "-"}</div>
 </div>
-
 ${schedule}
-
 `;
 
-        const swapButton =
-
-            card.querySelector(
-                ".swap-button"
-            );
+        const swapButton = card.querySelector(".swap-button");
 
         if (swapButton) {
 
             swapButton.onclick = () => {
 
-                openSubstitution(
-                    medications,
-                    index
-                );
+                openSubstitution(medications, index);
 
             };
 
@@ -591,10 +411,7 @@ ${schedule}
     =====================================
     */
 
-    const activeCard =
-        container.querySelector(
-            ".medication-card.active"
-        );
+    const activeCard = container.querySelector(".medication-card.active");
 
     if (activeCard) {
 
@@ -616,44 +433,44 @@ Helyettesítés
 =====================================
 */
 
-function openSubstitution(
-    medications,
-    index
-){
+async function openSubstitution(medications, index) {
 
-if (isPatientClosed()) {
+    if (await isPatientClosed()) {
 
-    return;
+        return;
 
-}
+    }
 
-    const med =
-        medications[index];
+    const med = medications[index];
 
     SubstitutionModal.open(
 
         med,
 
-        selectedDrug => {
+        async selectedDrug => {
 
-            med.medication =
-                selectedDrug.name;
+            med.medication = selectedDrug.name;
 
-            med.ean =
-                selectedDrug.ean;
+            med.ean = selectedDrug.ean;
 
-            med.substance =
-                selectedDrug.substance;
+            med.substance = selectedDrug.substance;
 
-            med.active =
-                selectedDrug.active;
+            med.active = selectedDrug.active;
 
-            med.canSubstitute =
-                false;
+            med.canSubstitute = false;
 
-            renderMedications(
-                medications
-            );
+            renderMedications(medications);
+
+            // Frissítés mentése
+            const patient = await Storage.loadPatient();
+
+            if (patient) {
+
+                patient.medications = medications;
+
+                await Storage.savePatient(patient);
+
+            }
 
         }
 
@@ -669,11 +486,7 @@ Gyógyszerelés lezárása
 
 function initCloseMedication() {
 
-    const button =
-
-        document.getElementById(
-            "completeButton"
-        );
+    const button = document.getElementById("completeButton");
 
     if (!button) {
 
@@ -681,19 +494,18 @@ function initCloseMedication() {
 
     }
 
-    button.onclick =
-
-        closeMedication;
+    button.onclick = closeMedication;
 
 }
 
-function closeMedication() {
+async function closeMedication() {
 
-    const patient =
-        Storage.loadPatient();
+    const patient = await Storage.loadPatient();
 
     if (!patient) {
+
         return;
+
     }
 
     if (
@@ -709,61 +521,43 @@ function closeMedication() {
 
     }
 
-    const missingLot =
-        patient.medications.filter(
-            med => !med.lot
-        ).length;
+    const missingLot = patient.medications.filter(med => !med.lot).length;
 
-    const missingExpiry =
-        patient.medications.filter(
-            med => !med.expiry
-        ).length;
+    const missingExpiry = patient.medications.filter(med => !med.expiry).length;
 
     if (missingLot || missingExpiry) {
 
         const proceed = confirm(
-
-`Figyelem!
-
-Hiányzó gyári szám:
-
-${missingLot}
-
-Hiányzó lejárat:
-
-${missingExpiry}
-
-Biztosan lezárod?`
-
+            `Figyelem!\n\nHiányzó gyári szám:\n${missingLot}\n\nHiányzó lejárat:\n${missingExpiry}\n\nBiztosan lezárod?`
         );
 
         if (!proceed) {
+
             return;
+
         }
 
-    }   // ← EZ HIÁNYZIK NÁLAD!
+    }
 
-    patient.status =
-        CONFIG.status.CHECKED;
+    patient.status = CONFIG.status.CHECKED;
 
     patient.closed = true;
 
-    patient.closedAt =
-        new Date().toISOString();
+    patient.closedAt = new Date().toISOString();
 
-    patient.closedBy =
-        Storage.loadUser().id;
+    const user = Storage.loadUser ? Storage.loadUser() : { id: 'Rendszer' };
 
-    Storage.savePatient(patient);
+    patient.closedBy = user ? user.id : 'Rendszer';
+
+    await Storage.savePatient(patient);
 
     PdfReport.generate(patient);
 
     alert("Gyógyszerelés lezárva.");
 
-    window.location.href =
-        "ward.html";
+    window.location.href = "ward.html";
 
-} 
+}
 
 /*
 =====================================
@@ -773,14 +567,8 @@ Csak olvasható mód
 
 function setReadOnlyMode() {
 
-
     // PDF import tiltása
-
-    const pdfInput =
-
-        document.getElementById(
-            "patientPdfInput"
-        );
+    const pdfInput = document.getElementById("patientPdfInput");
 
     if (pdfInput) {
 
@@ -789,58 +577,31 @@ function setReadOnlyMode() {
     }
 
     // DM olvasó tiltása
+    if (typeof DmInput !== "undefined" && DmInput.disable) {
 
-    if (
+        DmInput.disable();
 
-    typeof DmInput !== "undefined" &&
-
-    DmInput.disable
-
-) {
-
-    DmInput.disable();
-
-}
+    }
 
     // Lezárás gomb tiltása
+    const completeButton = document.getElementById("completeButton");
 
-    const completeButton =
+    if (completeButton) {
 
-    document.getElementById(
-        "completeButton"
-    );
+        completeButton.disabled = true;
 
-if (completeButton) {
+        completeButton.innerHTML = "Gyógyszerelés lezárva";
 
-    completeButton.disabled = true;
+        completeButton.classList.add("completed");
 
-    completeButton.innerHTML =
-
-        "Gyógyszerelés lezárva";
-
-    completeButton.classList.add(
-        "completed"
-    );
-
-}
+    }
 
     // Helyettesítés gombok elrejtése
+    document.querySelectorAll(".swap-button").forEach(button => {
 
-    document
+        button.style.display = "none";
 
-        .querySelectorAll(
-
-            ".swap-button"
-
-        )
-
-        .forEach(button => {
-
-            button.style.display =
-
-                "none";
-
-        });
+    });
 
 }
 
@@ -850,11 +611,9 @@ Gyógyszerelés lezárva?
 =====================================
 */
 
-function isPatientClosed() {
+async function isPatientClosed() {
 
-    const patient =
-
-        Storage.loadPatient();
+    const patient = await Storage.loadPatient();
 
     if (!patient) {
 
@@ -868,11 +627,7 @@ function isPatientClosed() {
 
     }
 
-    alert(
-
-        "A gyógyszerelés már le lett zárva."
-
-    );
+    alert("A gyógyszerelés már le lett zárva.");
 
     return true;
 
@@ -884,13 +639,9 @@ Megjegyzés
 =====================================
 */
 
-function initPatientNote() {
+async function initPatientNote() {
 
-    const note =
-
-        document.getElementById(
-            "patientNote"
-        );
+    const note = document.getElementById("patientNote");
 
     if (!note) {
 
@@ -898,9 +649,7 @@ function initPatientNote() {
 
     }
 
-    const patient =
-
-        Storage.loadPatient();
+    const patient = await Storage.loadPatient();
 
     if (!patient) {
 
@@ -908,33 +657,23 @@ function initPatientNote() {
 
     }
 
-    note.value =
+    note.value = patient.closeNote || "";
 
-        patient.closeNote || "";
+    note.readOnly = !!patient.closed;
 
-    note.readOnly =
+    note.oninput = async () => {
 
-        !!patient.closed;
+        const currentPatient = await Storage.loadPatient();
 
-    note.oninput = () => {
-
-        const patient =
-
-            Storage.loadPatient();
-
-        if (!patient) {
+        if (!currentPatient) {
 
             return;
 
         }
 
-        patient.closeNote =
+        currentPatient.closeNote = note.value.trimEnd();
 
-            note.value.trimEnd();
-
-        Storage.savePatient(
-            patient
-        );
+        await Storage.savePatient(currentPatient);
 
     };
 
