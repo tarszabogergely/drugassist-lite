@@ -6,8 +6,8 @@ Fájl:
 substitution-modal.js
 
 Feladata:
-Gyógyszer helyettesítési
-modal kezelése.
+Gyógyszer-helyettesítési modál kezelése
+(Supabase integrációval).
 
 Fejlesztő:
 Tarszabó Gergely + ChatGPT
@@ -16,6 +16,8 @@ Verzió:
 2.0.0
 =========================================
 */
+
+"use strict";
 
 const SubstitutionModal = {
 
@@ -31,72 +33,51 @@ const SubstitutionModal = {
 
     open(medication, callback) {
 
-        this.callback =
-            callback;
+        this.callback = callback;
 
-        this.selectedDrug =
-            null;
+        this.selectedDrug = null;
 
-        const modal =
-            document.getElementById(
-                "substitutionModal"
-            );
+        const modal = document.getElementById("substitutionModal");
 
-        document.getElementById(
-            "originalMedication"
-        ).textContent =
-            medication.medication;
+        if (!modal) return;
 
-        const list =
-            document.getElementById(
-                "substitutionList"
-            );
+        const originalElem = document.getElementById("originalMedication");
+
+        if (originalElem) {
+
+            originalElem.textContent = medication?.medication || "";
+
+        }
+
+        const list = document.getElementById("substitutionList");
+
+        if (!list) return;
 
         list.innerHTML = "";
 
-        medication.alternatives.forEach(drug => {
+        const alternatives = medication?.alternatives || [];
 
-            const item =
-                document.createElement(
-                    "div"
-                );
+        alternatives.forEach(drug => {
 
-            item.className =
-                "sub-item";
+            const item = document.createElement("div");
+
+            item.className = "sub-item";
 
             item.innerHTML = `
-
 <b>${drug.name}</b>
-
 <br>
-
-EAN:
-${drug.ean}
-
+EAN: ${drug.ean || "-"}
 `;
 
             item.onclick = () => {
 
-                list
-
-                    .querySelectorAll(
-                        ".sub-item"
-                    )
-
-                    .forEach(el =>
-
-                        el.classList.remove(
-                            "selected"
-                        )
-
-                    );
-
-                item.classList.add(
-                    "selected"
+                list.querySelectorAll(".sub-item").forEach(el =>
+                    el.classList.remove("selected")
                 );
 
-                this.selectedDrug =
-                    drug;
+                item.classList.add("selected");
+
+                this.selectedDrug = drug;
 
             };
 
@@ -104,9 +85,7 @@ ${drug.ean}
 
         });
 
-        modal.classList.remove(
-            "hidden"
-        );
+        modal.classList.remove("hidden");
 
     },
 
@@ -118,18 +97,15 @@ ${drug.ean}
 
     close() {
 
-        document
+        const modal = document.getElementById("substitutionModal");
 
-            .getElementById(
-                "substitutionModal"
-            )
+        if (modal) {
 
-            .classList.add(
-                "hidden"
-            );
+            modal.classList.add("hidden");
 
-        this.selectedDrug =
-            null;
+        }
+
+        this.selectedDrug = null;
 
     },
 
@@ -141,53 +117,35 @@ ${drug.ean}
 
     init() {
 
-        document
+        const subCancel = document.getElementById("subCancel");
 
-            .getElementById(
-                "subCancel"
-            )
+        if (subCancel) {
 
-            .onclick = () => {
+            subCancel.onclick = () => {
 
                 this.close();
 
             };
 
-        document
+        }
 
-            .getElementById(
-                "subOk"
-            )
+        const subOk = document.getElementById("subOk");
 
-            .onclick = () => {
+        if (subOk) {
 
-                if (
+            subOk.onclick = async () => {
 
-                    !this.selectedDrug
+                if (!this.selectedDrug) {
 
-                ) {
-
-                    alert(
-
-                        "Válassz gyógyszert!"
-
-                    );
+                    alert("Válassz gyógyszert!");
 
                     return;
 
                 }
 
-                if (
+                if (this.callback) {
 
-                    this.callback
-
-                ) {
-
-                    this.callback(
-
-                        this.selectedDrug
-
-                    );
+                    await this.callback(this.selectedDrug);
 
                 }
 
@@ -195,45 +153,33 @@ ${drug.ean}
 
             };
 
-        const modal =
+        }
 
-            document.getElementById(
-                "substitutionModal"
-            );
+        const modal = document.getElementById("substitutionModal");
 
-        modal.onclick = e => {
+        if (modal) {
 
-            if (
+            modal.onclick = e => {
 
-                e.target === modal
-
-            ) {
-
-                this.close();
-
-            }
-
-        };
-
-        document.addEventListener(
-
-            "keydown",
-
-            e => {
-
-                if (
-
-                    e.key === "Escape"
-
-                ) {
+                if (e.target === modal) {
 
                     this.close();
 
                 }
 
+            };
+
+        }
+
+        document.addEventListener("keydown", e => {
+
+            if (e.key === "Escape") {
+
+                this.close();
+
             }
 
-        );
+        });
 
     }
 
