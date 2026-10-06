@@ -8,7 +8,7 @@ review-ward.js
 Feladata:
 Az aktuális osztály gyógyszerészi
 ellenőrzésre váró betegeinek
-megjelenítése.
+megjelenítése (Supabase adatbázissal).
 
 Megjeleníti azokat a betegeket,
 akiknek a gyógyszerelése lezárásra
@@ -18,7 +18,7 @@ Fejlesztő:
 Tarszabó Gergely + ChatGPT
 
 Verzió:
-1.0.0
+2.0.0
 =========================================
 */
 
@@ -27,36 +27,32 @@ document.addEventListener(
     loadWard
 );
 
-function loadWard() {
+async function loadWard() {
 
-        const wardCode =
-        Storage.loadCurrentWard();
+    const wardCode = Storage.loadCurrentWard ? Storage.loadCurrentWard() : null;
 
     if (!wardCode) {
 
         alert("Nincs kiválasztott osztály.");
 
-        window.location.href =
-            "dashboard.html";
+        window.location.href = "dashboard.html";
 
         return;
 
     }
 
-    const wards =
-        Storage.loadWards();
+    // Osztályok aszinkron betöltése Supabase-ből
+    const wards = await Storage.loadWards();
 
-    const ward =
-        wards.find(
-            w => w.wardCode === wardCode
-        );
+    const ward = wards.find(
+        w => w.wardCode === wardCode
+    );
 
     if (!ward) {
 
         alert("Az osztály nem található.");
 
-        window.location.href =
-            "dashboard.html";
+        window.location.href = "dashboard.html";
 
         return;
 
@@ -70,43 +66,34 @@ function renderWard(ward) {
 
     document.getElementById(
         "wardTitle"
-    ).textContent =
-        ward.wardName;
+    ).textContent = ward.wardName;
 
-    const reviewPatients =
-        ward.patients.filter(
-            patient =>
-                patient.status === CONFIG.status.CHECKED
-        );
+    const reviewPatients = (ward.patients || []).filter(
+        patient => patient.status === CONFIG.status.CHECKED
+    );
 
     document.getElementById(
         "patientCount"
     ).textContent =
-        reviewPatients.length +
-        " beteg vár ellenőrzésre";
+        reviewPatients.length + " beteg vár ellenőrzésre";
 
-    const container =
-        document.getElementById(
-            "patientContainer"
-        );
+    const container = document.getElementById(
+        "patientContainer"
+    );
 
     container.innerHTML = "";
 
     reviewPatients.forEach(patient => {
 
-        const card =
-            Render.createPatientCard(
-                patient
-            );
+        const card = Render.createPatientCard(patient);
 
-        card.onclick = () => {
+        card.onclick = async () => {
 
-            Storage.saveCurrentPatient(
-                patient.patientId
-            );
+            if (Storage.saveCurrentPatient) {
+                await Storage.saveCurrentPatient(patient.patientId);
+            }
 
-            location.href =
-                "review.html";
+            location.href = "review.html";
 
         };
 
