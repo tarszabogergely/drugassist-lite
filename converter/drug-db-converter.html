@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>
+DrugAssist - Gyógyszertörzs konvertáló
+</title>
+
+<meta
+    name="viewport"
+    content="width=device-width,initial-scale=1">
+
+<link
+    rel="stylesheet"
+    href="../css/style.css">
+
+<style>
+
+body{
+
+    max-width:700px;
+    margin:40px auto;
+    padding:20px;
+
+    font-family:"Segoe UI",Arial,sans-serif;
+    background:#f4f6f9;
+    color:#333;
+
+}
+
+.page{
+
+    background:#fff;
+    border-radius:14px;
+    padding:28px;
+    box-shadow:0 4px 18px rgba(0,0,0,.08);
+
+}
+
+h1{
+
+    margin:0;
+    text-align:center;
+
+}
+
+.subtitle{
+
+    margin-top:8px;
+    margin-bottom:28px;
+
+    text-align:center;
+    color:#666;
+
+}
+
+.section{
+
+    margin-bottom:24px;
+
+}
+
+label{
+
+    display:block;
+    margin-bottom:10px;
+
+    font-weight:600;
+
+}
+
+input[type=file]{
+
+    width:100%;
+
+}
+
+button{
+
+    width:100%;
+    padding:14px;
+
+    font-size:16px;
+    font-weight:bold;
+
+    border:none;
+    border-radius:10px;
+
+    cursor:pointer;
+
+}
+
+#result{
+
+    margin-top:25px;
+
+    min-height:40px;
+
+    padding:15px;
+
+    border-radius:10px;
+
+    background:#f6f6f6;
+
+    white-space:pre-wrap;
+
+}
+
+.footer{
+
+    margin-top:25px;
+
+    text-align:center;
+    color:#777;
+    font-size:13px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="page">
+
+<h1>
+💊 Gyógyszertörzs konvertáló
+</h1>
+
+<div class="subtitle">
+
+CSV fájl konvertálása DrugAssist JSON adatbázissá
+
+</div>
+
+<div class="section">
+
+<label for="csvInput">
+
+CSV fájl kiválasztása
+
+</label>
+
+<input
+    type="file"
+    id="csvInput"
+    accept=".csv">
+
+</div>
+
+<button id="convertBtn">
+
+JSON készítése
+
+</button>
+
+<div id="result">
+
+Válasszon ki egy CSV fájlt, majd kattintson a
+<b>JSON készítése</b> gombra.
+
+</div>
+
+<div class="footer">
+
+DrugAssist • Adatbázis segédprogram
+
+</div>
+
+</div>
+
+<script src="drug-db-converter.js"></script>
+
+</body>
+</html>

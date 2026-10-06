@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>DrugAssist – Betegek</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background-color: #f4f6f9;
+}
+
+/* ===== HEADER ===== */
+
+header {
+    background: white;
+    padding: 14px 30px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.header-right {
+    font-size: 14px;
+    color: #666;
+}
+
+/* ===== CONTAINER ===== */
+
+.container {
+    padding: 30px;
+}
+
+/* ===== SEARCH ===== */
+
+.search-bar {
+    margin-bottom: 20px;
+}
+
+.search-input {
+    width: 350px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+/* ===== FILTER BUBBLES ===== */
+
+.filter-bar {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 12px;
+}
+
+.filter-btn {
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    background-color: #e0e0e0;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.filter-btn.active {
+    background-color: #1976d2;
+    color: white;
+}
+
+/* ===== TABLE ===== */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+}
+
+th, td {
+    padding: 14px;
+    font-size: 14px;
+}
+
+th {
+    background-color: #f0f2f5;
+    text-align: left;
+}
+
+tr:not(:last-child) {
+    border-bottom: 1px solid #eee;
+}
+
+tr:hover {
+    background-color: #fafafa;
+}
+
+.open-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: none;
+    background-color: #4caf50;
+    color: white;
+    cursor: pointer;
+    font-size: 13px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>DrugAssist – Betegek</h1>
+    <div class="header-right">
+        Dr. Kovács Anna | <span id="dateTime"></span>
+    </div>
+</header>
+
+<div class="container">
+
+<!-- SEARCH -->
+
+<div class="search-bar">
+    <input type="text" class="search-input"
+           placeholder="Keresés név vagy TAJ alapján..."
+           onkeyup="searchTable(this.value)">
+</div>
+
+<!-- FILTER -->
+
+<div class="filter-bar">
+    <button class="filter-btn active" onclick="setFilter(event,'active')">
+        Aktív betegek
+    </button>
+    <button class="filter-btn" onclick="setFilter(event,'all')">
+        Összes beteg
+    </button>
+</div>
+
+<!-- TABLE -->
+
+<table>
+    <thead>
+        <tr>
+            <th>Név</th>
+            <th>Életkor</th>
+            <th>TAJ</th>
+            <th>Utolsó osztály</th>
+            <th>Utolsó igény</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="patientTable">
+
+        <tr data-status="active">
+            <td>Kovács János</td>
+            <td>67 év</td>
+            <td>123456789</td>
+            <td>Belgyógyászat</td>
+            <td>2026.02.27</td>
+            <td><button class="open-btn" onclick="location.href='patient-detail.html'">Megnyitás</button></td>
+        </tr>
+
+        <tr data-status="active">
+            <td>Nagy Péter</td>
+            <td>58 év</td>
+            <td>987654321</td>
+            <td>Sebészet</td>
+            <td>2026.02.27</td>
+            <td><button class="open-btn" onclick="location.href='patient-detail.html'">Megnyitás</button></td>
+        </tr>
+
+        <tr data-status="active">
+            <td>Szabó Mária</td>
+            <td>72 év</td>
+            <td>111222333</td>
+            <td>Neurológia</td>
+            <td>2026.02.27</td>
+            <td><button class="open-btn" onclick="location.href='patient-detail.html'">Megnyitás</button></td>
+        </tr>
+
+        <tr data-status="all">
+            <td>Tóth László</td>
+            <td>63 év</td>
+            <td>444555666</td>
+            <td>Kardiológia</td>
+            <td>2026.02.24</td>
+            <td><button class="open-btn" onclick="location.href='patient-detail.html'">Megnyitás</button></td>
+        </tr>
+
+        <tr data-status="all">
+            <td>Varga Anna</td>
+            <td>51 év</td>
+            <td>777888999</td>
+            <td>Belgyógyászat</td>
+            <td>2026.02.20</td>
+            <td><button class="open-btn" onclick="location.href='patient-detail.html'">Megnyitás</button></td>
+        </tr>
+
+        <tr data-status="all">
+            <td>Molnár Gábor</td>
+            <td>46 év</td>
+            <td>222333444</td>
+            <td>Sebészet</td>
+            <td>2026.02.18</td>
+            <td><button class="open-btn" onclick="location.href='patient-detail.html'">Megnyitás</button></td>
+        </tr>
+
+    </tbody>
+</table>
+
+</div>
+
+<script>
+
+/* DATE TIME */
+
+function updateDateTime() {
+    const now = new Date();
+    const date = now.toLocaleDateString("hu-HU");
+    const time = now.toLocaleTimeString("hu-HU", {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    document.getElementById("dateTime").innerText = date + " | " + time;
+}
+
+updateDateTime();
+setInterval(updateDateTime, 60000);
+
+/* SEARCH */
+
+function searchTable(value) {
+    value = value.toLowerCase();
+    document.querySelectorAll("#patientTable tr").forEach(row => {
+        row.style.display =
+            row.innerText.toLowerCase().includes(value) ? "" : "none";
+    });
+}
+
+/* FILTER */
+
+function setFilter(event, type) {
+    document.querySelectorAll(".filter-btn")
+        .forEach(btn => btn.classList.remove("active"));
+
+    event.target.classList.add("active");
+
+    document.querySelectorAll("#patientTable tr")
+        .forEach(row => {
+            const status = row.getAttribute("data-status");
+            if(type === "all") {
+                row.style.display = "";
+            } else {
+                row.style.display = (status === "active") ? "" : "none";
+            }
+        });
+}
+
+</script>
+
+</body>
+</html>

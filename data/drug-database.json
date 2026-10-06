@@ -1,0 +1,62 @@
+[
+    {
+        "ean": "123456",
+        "name": "COVEREX-AS 5MG FILMTABLETTA 30X",
+        "substance": "Perindopril",
+        "active": true
+    },
+    {
+        "ean": "4011548029985",
+        "name": "PERINEVA 4MG TABLETTA 30X",
+        "substance": "Perindopril",
+        "active": true
+    },
+    {
+        "ean": "789456",
+        "name": "ALGOPYRIN 500MG TABLETTA 10X",
+        "substance": "Metamizol",
+        "active": true
+    },
+    {
+        "ean": "5413760358031",
+        "name": "ALGOFLEX FORTE DOLO 400 MG FILMTABLETTA 24X BUB",
+        "substance": "Ibuprofen",
+        "active": true
+    },
+    {
+        "ean": "789132",
+        "name": "ELIQUIS 2,5MG FILMTABLETTA 60X BUB",
+        "substance": "Apixaban",
+        "active": true
+    },
+    {
+        "ean": "4043589000821",
+        "name": "VEROSPIRON 25MG TABLETTA 20X",
+        "substance": "Spironolakton",
+        "active": true
+    },
+    {
+        "ean": "4011548027950",
+        "name": "KALDYUM 600MG RETARD KAPSZULA 50X",
+        "substance": "Kalium",
+        "active": true
+    },
+    {
+        "ean": "4260095685308",
+        "name": "FURON 40MG TABLETTA 50X",
+        "substance": "Furoszemid",
+        "active": true
+    },
+    {
+        "ean": "5995327194028",
+        "name": "BETAGEN 24MG TABLETTA 50X",
+        "substance": "Bethaisztin",
+        "active": true
+    },
+    {
+        "ean": "5995327167848",
+        "name": "IBUMAX 200MG FILMTABLETTA 100X",
+        "substance": "Ibuprofen",
+        "active": true
+    }
+]

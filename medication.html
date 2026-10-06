@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>DrugAssist</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family:"Segoe UI",Arial,sans-serif;
+    background:#f4f6f9;
+}
+
+/* HEADER */
+
+header{
+    background:white;
+    padding:18px 32px;
+    border-bottom:1px solid #e0e0e0;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+header h1{
+    margin:0;
+    font-size:22px;
+    font-weight:600;
+}
+
+.user-info{
+    color:#666;
+    font-size:14px;
+}
+
+/* CONTAINER */
+
+.container{
+    padding:32px;
+}
+
+/* IMPORT */
+
+.import-card{
+    background:white;
+    border-radius:14px;
+    padding:24px;
+
+    box-shadow:
+        0 4px 14px rgba(0,0,0,0.05);
+
+    margin-bottom:40px;
+}
+
+.import-card h2{
+    margin-top:0;
+}
+
+.import-area{
+    border:2px dashed #2196f3;
+    border-radius:12px;
+
+    padding:40px;
+    text-align:center;
+
+    background:#f8fbff;
+}
+
+.import-area:hover{
+    background:#eef6ff;
+}
+
+input[type=file]{
+    margin-top:20px;
+}
+
+/* WARDS */
+
+.section-title{
+    font-size:20px;
+    font-weight:600;
+    margin-bottom:20px;
+}
+
+.ward-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(auto-fit,minmax(320px,1fr));
+
+    gap:24px;
+}
+
+.ward-card{
+
+    background:white;
+
+    border-radius:14px;
+
+    padding:22px;
+
+    box-shadow:
+        0 4px 14px rgba(0,0,0,0.05);
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.ward-card:hover{
+
+    transform:translateY(-4px);
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,0.08);
+}
+
+.ward-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+}
+
+.ward-name{
+
+    font-size:18px;
+    font-weight:600;
+}
+
+.ward-count{
+
+    color:#666;
+    margin-top:8px;
+}
+
+.progress-row{
+
+    display:flex;
+
+    gap:16px;
+
+    margin-top:18px;
+
+    font-size:14px;
+}
+
+.badge{
+
+    padding:6px 12px;
+
+    border-radius:20px;
+
+    color:white;
+
+    font-size:13px;
+}
+
+.badge-new{
+    background:#9e9e9e;
+}
+
+.badge-progress{
+    background:#ff9800;
+}
+
+.badge-done{
+    background:#4caf50;
+}
+
+.completion{
+
+    width:70px;
+    height:70px;
+
+    border-radius:18px;
+
+    background:#e8f5e9;
+
+    color:#4caf50;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    font-size:20px;
+    font-weight:700;
+}
+
+.empty-state{
+
+    background:white;
+
+    border-radius:14px;
+
+    padding:40px;
+
+    text-align:center;
+
+    color:#777;
+
+    box-shadow:
+        0 4px 14px rgba(0,0,0,0.05);
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+    <h1>DrugAssist</h1>
+
+    <div class="user-info">
+        Gergő | 2026.06.24
+    </div>
+
+</header>
+
+<div class="container">
+
+    <div class="import-card">
+
+        <h2>Osztálylista PDF import</h2>
+
+        <div class="import-area">
+
+            <div>
+                Húzd ide az ePharma osztálylista PDF-et
+            </div>
+
+            <input
+                type="file"
+                id="pdfInput"
+                accept=".pdf"
+            >
+
+        </div>
+
+    </div>
+
+    <div class="section-title">
+        Osztályok
+    </div>
+
+    <div
+    id="wardContainer"
+    class="ward-grid"
+>
+
+    <div class="empty-state">
+
+        Még nincs betöltött osztálylista.
+
+    </div>
+
+</div>
+
+
+<script src="js/config.js"></script>
+
+<script src="js/utils.js"></script>
+
+<script src="js/storage.js"></script>
+
+<script src="js/render.js"></script>
+
+<script src="js/pdf.min.js"></script>
+
+<script src="js/departments.js"></script>
+
+<script src="js/pdf-import.js"></script>
+
+<script src="js/dashboard.js"></script>
+
+</body>
+</html>

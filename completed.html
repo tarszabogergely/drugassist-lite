@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>DrugAssist - Készen van</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+
+    margin:0;
+
+    font-family:"Segoe UI",Arial,sans-serif;
+
+    background:#f4f6f9;
+
+}
+
+/* HEADER */
+
+header{
+
+    background:white;
+
+    padding:18px 32px;
+
+    border-bottom:1px solid #e0e0e0;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+header h1{
+
+    margin:0;
+
+    font-size:22px;
+
+}
+
+.user-info{
+
+    color:#666;
+
+    font-size:14px;
+
+}
+
+/* CONTAINER */
+
+.container{
+
+    max-width:1200px;
+
+    margin:auto;
+
+    padding:32px;
+
+}
+
+/* BACK */
+
+.back{
+
+    margin-bottom:24px;
+
+}
+
+.back a{
+
+    text-decoration:none;
+
+    color:#1976d2;
+
+    font-weight:600;
+
+}
+
+/* CARD */
+
+.card{
+
+    background:white;
+
+    border-radius:14px;
+
+    padding:24px;
+
+    margin-bottom:24px;
+
+    box-shadow:0 4px 14px rgba(0,0,0,.05);
+
+}
+
+.card h2{
+
+    margin:0 0 20px;
+
+    font-size:22px;
+
+}
+
+/* LISTA */
+
+#patientList{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:12px;
+
+}
+
+.patient-card{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:20px;
+
+    padding:18px;
+
+    border:1px solid #e0e0e0;
+
+    border-left:6px solid #43a047;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.patient-card:hover{
+
+    background:#f8fff8;
+
+}
+
+.patient-name{
+
+    font-size:18px;
+
+    font-weight:600;
+
+}
+
+.patient-info{
+
+    color:#666;
+
+    margin-top:4px;
+
+    font-size:14px;
+
+}
+
+.patient-status{
+
+    font-size:34px;
+
+}
+
+.empty{
+
+    text-align:center;
+
+    color:#777;
+
+    padding:40px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1>DrugAssist</h1>
+
+<div class="user-info">
+
+Gergő
+
+</div>
+
+</header>
+
+<div class="container">
+
+<div class="back">
+
+<a href="dashboard.html">
+
+← Vissza a Dashboardra
+
+</a>
+
+</div>
+
+<section class="card">
+
+<h2>
+
+✅ Készen van
+
+</h2>
+
+<div id="patientList">
+
+</div>
+
+</section>
+
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/completed.js"></script>
+
+</body>
+
+</html>

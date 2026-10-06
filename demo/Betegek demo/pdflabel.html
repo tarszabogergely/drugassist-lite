@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>DrugAssist – Címke</title>
+
+<style>
+@page {
+    size: 58mm 43mm;
+    margin: 0;
+}
+
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+}
+
+.label{
+    width:58mm;
+    height:43mm;
+    padding:4mm;
+    box-sizing:border-box;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+
+/* ===== WARNING ===== */
+
+.warning{
+    font-size:9pt;
+    font-weight:bold;
+    text-align:center;
+}
+
+/* ===== BARCODE ===== */
+
+.barcode-section{
+    text-align:center;
+}
+
+.identifier{
+    font-size:8pt;
+    margin-bottom:1mm;
+}
+
+.barcode-box{
+    border:1px solid #000;
+    height:10mm; /* kicsit kisebb */
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:8pt;
+}
+
+/* ===== PATIENT INFO ===== */
+
+.patient-block{
+    text-align:center;
+    margin-top:2mm; /* kis rés a vonalkód után */
+}
+
+.patient-name{
+    font-size:12pt;
+    font-weight:bold;
+}
+
+.patient-data{
+    font-size:9pt;
+}
+
+.footer{
+    font-size:9pt;
+    text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="label">
+
+    <!-- FIGYELMEZTETÉS (ha van) -->
+    <div class="warning">
+        ⚠ MÓDOSÍTOTT
+    </div>
+
+    <!-- VONALKÓD -->
+    <div class="barcode-section">
+        <div class="identifier">
+            MED-20260227-00034
+        </div>
+        <div class="barcode-box">
+            CODE128
+        </div>
+    </div>
+
+    <!-- BETEG -->
+    <div class="patient-block">
+        <div class="patient-name">
+            Kovács János
+        </div>
+        <div class="patient-data">
+            Szül.: 1958.04.12
+        </div>
+    </div>
+
+    <!-- OSZTÁLY -->
+    <div class="footer">
+        Belgyógyászat – 12/B
+    </div>
+
+</div>
+
+</body>
+</html>

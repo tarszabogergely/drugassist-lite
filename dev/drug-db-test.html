@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>
+
+Drug Database Test
+
+</title>
+
+<style>
+
+body{
+
+    font-family:Segoe UI;
+
+    margin:30px;
+
+    background:#f5f5f5;
+
+}
+
+.card{
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:10px;
+
+    margin-bottom:20px;
+
+}
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+th,
+td{
+
+    border:1px solid #ddd;
+
+    padding:8px;
+
+}
+
+th{
+
+    background:#ececec;
+
+}
+
+input{
+
+    padding:8px;
+
+    width:300px;
+
+}
+
+button{
+
+    padding:8px 16px;
+
+}
+
+#result{
+
+    white-space:pre-wrap;
+
+    font-family:Consolas;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>
+
+Gyógyszertörzs
+
+</h2>
+
+<input
+
+type="file"
+
+id="csvInput"
+
+accept=".csv">
+
+</div>
+
+<div class="card">
+
+<h2>
+
+Keresés név szerint
+
+</h2>
+
+<input
+
+id="searchName">
+
+<button
+
+id="btnName">
+
+Keresés
+
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>
+
+Keresés hatóanyag szerint
+
+</h2>
+
+<input
+
+id="searchSubstance">
+
+<button
+
+id="btnSubstance">
+
+Keresés
+
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>
+
+Eredmény
+
+</h2>
+
+<pre id="result">
+
+</pre>
+
+</div>
+
+<script src="../js/utils.js"></script>
+
+<script src="../js/modules/drug-database.js"></script>
+
+<script src="drug-db-test.js"></script>
+
+</body>
+
+</html>

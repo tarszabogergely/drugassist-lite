@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html lang="hu">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>DrugAssist Parser Test</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+<style>
+
+body{
+
+    font-family:Arial,sans-serif;
+
+    margin:20px;
+
+}
+
+section{
+
+    margin-bottom:30px;
+
+}
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+th,td{
+
+    border:1px solid #ddd;
+
+    padding:6px;
+
+    text-align:left;
+
+    font-size:13px;
+
+}
+
+pre{
+
+    background:#f5f5f5;
+
+    padding:10px;
+
+    overflow:auto;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>DrugAssist Parser Test</h1>
+
+<h3>Gyógyszertörzs</h3>
+
+<input
+    type="file"
+    id="drugCsv"
+    accept=".csv">
+
+<input
+    type="file"
+    id="pdfInput"
+    accept=".pdf">
+
+<section>
+
+<h2>PDF tokenek</h2>
+
+<table id="tokenTable">
+
+<thead>
+
+<tr>
+
+<th>#</th>
+<th>X</th>
+<th>Y</th>
+<th>Font</th>
+<th>Width</th>
+<th>Height</th>
+<th>Szöveg</th>
+
+</tr>
+
+</thead>
+
+<tbody></tbody>
+
+</table>
+
+</section>
+
+<section>
+
+<h2>Sorok</h2>
+
+<pre id="rows"></pre>
+
+</section>
+
+<section>
+
+<h2>Parser eredmény</h2>
+
+<pre id="result"></pre>
+
+</section>
+
+<script src="../js/config.js"></script>
+
+<script src="../js/utils.js"></script>
+
+<script src="../js/pdf.min.js"></script>
+
+<script src="../js/modules/pdf-layout-parser.js"></script>
+
+<script src="../js/modules/medication-locator.js"></script>
+
+<script src="../js/modules/medication-merger.js"></script>
+
+<script src="../js/modules/drug-database.js"></script>
+
+<script src="../js/modules/medication-parser.js"></script>
+
+<script src="../js/pdf-import.js"></script>
+
+<script src="parser-test.js"></script>
+
+</body>
+
+</html>

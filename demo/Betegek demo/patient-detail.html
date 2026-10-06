@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>DrugAssist – Beteg adatlap</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background-color: #f4f6f9;
+}
+
+/* ===== HEADER ===== */
+
+header {
+    background: white;
+    padding: 14px 30px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.header-right {
+    font-size: 14px;
+    color: #666;
+}
+
+/* ===== CONTAINER ===== */
+
+.container {
+    padding: 30px;
+}
+
+/* ===== PATIENT CARD ===== */
+
+.patient-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+}
+
+.patient-name {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.patient-info {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* ===== TABLE ===== */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+}
+
+th, td {
+    padding: 14px;
+    font-size: 14px;
+}
+
+th {
+    background-color: #f0f2f5;
+    text-align: left;
+}
+
+tr:not(:last-child) {
+    border-bottom: 1px solid #eee;
+}
+
+tr:hover {
+    background-color: #fafafa;
+}
+
+/* ===== STATUS ===== */
+
+.status-ok { color: #4caf50; font-weight: 500; }
+.status-warning { color: #ff9800; font-weight: 500; }
+.status-progress { color: #2196f3; font-weight: 500; }
+
+/* ===== BUTTONS ===== */
+
+.pdf-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    background-color: #1976d2;
+    color: white;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.label-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    background-color: #4caf50;
+    color: white;
+    cursor: pointer;
+    font-size: 13px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>DrugAssist – Beteg adatlap</h1>
+    <div class="header-right">
+        Dr. Kovács Anna | <span id="dateTime"></span>
+    </div>
+</header>
+
+<div class="container">
+
+<!-- BETEG ADATOK -->
+
+<div class="patient-card">
+    <div class="patient-name">Kovács János</div>
+    <div class="patient-info">
+        TAJ: 123456789<br>
+        Születési év: 1958<br>
+        Utolsó osztály: Belgyógyászat<br>
+        Jelenlegi státusz: <span class="status-warning">Gyógyszerelésre vár</span>
+    </div>
+</div>
+
+<!-- ELŐZMÉNYEK -->
+
+<h2 style="font-size:18px; margin-bottom:15px;">Korábbi gyógyszerelések</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Dátum</th>
+            <th>Osztály</th>
+            <th>Gyógyszerelés ID</th>
+            <th>Státusz</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+
+        <tr>
+            <td>2026.02.27</td>
+            <td>Belgyógyászat</td>
+            <td>MED-20260227-00034</td>
+            <td class="status-progress">Ellenőrzésre vár</td>
+            <td><button class="pdf-btn" onclick="location.href='pdfpatient-detail.html'">PDF megnyitás</button></td>
+            <td><button class="label-btn" onclick="location.href='pdflabel.html'">Címke nyomtatás</button></td>
+        </tr>
+
+        <tr>
+            <td>2026.02.24</td>
+            <td>Belgyógyászat</td>
+            <td>MED-20260224-00021</td>
+            <td class="status-ok">Készen van</td>
+            <td><button class="pdf-btn" onclick="location.href='pdfpatient-detail.html'">PDF megnyitás</button></td>
+            <td><button class="label-btn" onclick="location.href='pdflabel.html'">Címke nyomtatás</button></td>
+        </tr>
+
+        <tr>
+            <td>2026.02.22</td>
+            <td>Sebészet</td>
+            <td>MED-20260222-00011</td>
+            <td class="status-ok">Készen van</td>
+            <td><button class="pdf-btn" onclick="location.href='pdfpatient-detail.html'">PDF megnyitás</button></td>
+            <td><button class="label-btn" onclick="location.href='pdflabel.html'">Címke nyomtatás</button></td>
+        </tr>
+
+        <tr>
+            <td>2026.02.20</td>
+            <td>Sebészet</td>
+            <td>MED-20260220-00005</td>
+            <td class="status-ok">Készen van</td>
+            <td><button class="pdf-btn" onclick="location.href='pdfpatient-detail.html'">PDF megnyitás</button></td>
+            <td><button class="label-btn" onclick="location.href='pdflabel.html'">Címke nyomtatás</button></td>
+        </tr>
+
+    </tbody>
+</table>
+
+</div>
+
+<script>
+
+function updateDateTime() {
+    const now = new Date();
+    const date = now.toLocaleDateString("hu-HU");
+    const time = now.toLocaleTimeString("hu-HU", {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    document.getElementById("dateTime").innerText = date + " | " + time;
+}
+
+updateDateTime();
+setInterval(updateDateTime, 60000);
+
+</script>
+
+</body>
+</html>

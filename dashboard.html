@@ -1,0 +1,481 @@
+<!--
+=========================================
+DrugAssist
+
+Fájl:
+dashboard.html
+
+Feladata:
+A DrugAssist kezdőoldala.
+
+Lehetővé teszi a gyógyszerelési
+és a gyógyszerészi ellenőrzési
+munkafolyamatok elindítását,
+valamint hozzáférést biztosít
+az alkalmazás további moduljaihoz.
+
+Fejlesztő:
+Tarszabó Gergely + ChatGPT
+
+Verzió:
+1.0.0
+=========================================
+-->
+
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>DrugAssist</title>
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+
+    margin:0;
+    font-family:"Segoe UI",Arial,sans-serif;
+    background:#f4f6f9;
+
+}
+
+/* ================= HEADER ================= */
+
+header{
+
+    background:white;
+
+    padding:20px 32px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    border-bottom:1px solid #e4e4e4;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.04);
+
+}
+
+.logo{
+
+    font-size:28px;
+
+    font-weight:600;
+
+}
+
+.user-panel{
+
+    text-align:right;
+
+}
+
+.user-name{
+
+    font-weight:600;
+
+}
+
+.user-time{
+
+    margin-top:4px;
+
+    color:#666;
+
+    font-size:14px;
+
+}
+
+.logout{
+
+    margin-top:10px;
+
+    padding:8px 16px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#ef5350;
+
+    color:white;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.logout:hover{
+
+    background:#d32f2f;
+
+}
+
+/* ================= CONTENT ================= */
+
+.container{
+
+    max-width:1200px;
+
+    margin:auto;
+
+    padding:35px;
+
+}
+
+/* ================= MAIN CARDS ================= */
+
+.main-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+
+    gap:30px;
+
+}
+
+.main-card{
+
+    background:white;
+
+    border-radius:18px;
+
+    padding:45px 30px;
+
+    text-align:center;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+    box-shadow:0 5px 18px rgba(0,0,0,.06);
+
+}
+
+.main-card:hover{
+
+    transform:translateY(-6px);
+
+    box-shadow:0 12px 24px rgba(0,0,0,.10);
+
+}
+
+.main-icon{
+
+    font-size:56px;
+
+    margin-bottom:18px;
+
+}
+
+.medication .main-icon{
+
+    color:#1976d2;
+
+}
+
+.review .main-icon{
+
+    color:#43a047;
+
+}
+
+.main-title{
+
+    font-size:24px;
+
+    font-weight:600;
+
+}
+
+/* ================= MODULES ================= */
+
+.modules{
+
+    margin-top:60px;
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+
+    gap:24px;
+
+}
+
+.module{
+
+    background:white;
+
+    border-radius:16px;
+
+    height:150px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+    box-shadow:0 4px 14px rgba(0,0,0,.05);
+
+}
+
+.module:hover{
+
+    transform:translateY(-5px);
+
+    box-shadow:0 10px 22px rgba(0,0,0,.08);
+
+}
+
+.module-icon{
+
+    font-size:40px;
+
+}
+
+.module-title{
+
+    margin-top:12px;
+
+    font-weight:600;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">
+
+DrugAssist
+
+</div>
+
+<div class="user-panel">
+
+<div class="user-name">
+
+Tarszabó Gergely
+
+</div>
+
+<div class="user-time">
+
+<span id="currentDate"></span>
+
+&nbsp;
+
+<span id="currentTime"></span>
+
+</div>
+
+<button
+class="logout"
+onclick="location.href='index.html'">
+
+Kijelentkezés
+
+</button>
+
+</div>
+
+</header>
+
+<div class="container">
+
+<div class="main-grid">
+
+<div
+class="main-card medication"
+onclick="location.href='medication.html'">
+
+<div class="main-icon">
+
+💊
+
+</div>
+
+<div class="main-title">
+
+Gyógyszerelésre vár
+
+</div>
+
+</div>
+
+<div
+class="main-card review"
+onclick="location.href='review-ward.html'">
+
+<div class="main-icon">
+
+👩🏻‍⚕️
+
+</div>
+
+<div class="main-title">
+
+Ellenőrzésre vár
+
+</div>
+
+</div>
+
+
+
+<div
+class="main-card review"
+onclick="location.href='completed.html'">
+
+<div class="main-icon">
+
+✔
+
+</div>
+
+<div class="main-title">
+
+Készen van
+
+</div>
+
+</div>
+
+</div>
+
+
+
+
+<div class="modules">
+
+<div
+class="module"
+onclick="location.href='patients.html'">
+
+<div class="module-icon">
+
+👤
+
+</div>
+
+<div class="module-title">
+
+Betegek
+
+</div>
+
+</div>
+
+<div
+class="module"
+onclick="location.href='reports.html'">
+
+<div class="module-icon">
+
+📊
+
+</div>
+
+<div class="module-title">
+
+Kimutatás
+
+</div>
+
+</div>
+
+<div
+class="module"
+onclick="location.href='drugs.html'">
+
+<div class="module-icon">
+
+🏥
+
+</div>
+
+<div class="module-title">
+
+Gyógyszerek
+
+</div>
+
+</div>
+
+<div
+class="module"
+onclick="location.href='settings.html'">
+
+<div class="module-icon">
+
+⚙
+
+</div>
+
+<div class="module-title">
+
+Beállítások
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function updateDateTime(){
+
+    const now=new Date();
+
+    document.getElementById("currentDate").textContent=
+        now.toLocaleDateString("hu-HU");
+
+    document.getElementById("currentTime").textContent=
+        now.toLocaleTimeString(
+            "hu-HU",
+            {
+                hour:"2-digit",
+                minute:"2-digit"
+            }
+        );
+
+}
+
+updateDateTime();
+
+setInterval(updateDateTime,60000);
+
+</script>
+
+</body>
+
+</html>

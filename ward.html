@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>DrugAssist - Osztály</title>
+
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+  
+<style>
+
+body{
+
+    margin:0;
+
+    font-family:"Segoe UI",Arial,sans-serif;
+
+    background:#f4f6f9;
+
+}
+
+/* HEADER */
+
+header{
+
+    background:white;
+
+    padding:18px 32px;
+
+    border-bottom:1px solid #e0e0e0;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+header h1{
+
+    margin:0;
+
+    font-size:22px;
+
+}
+
+.user-info{
+
+    color:#666;
+
+    font-size:14px;
+
+}
+
+/* CONTAINER */
+
+.container{
+
+    padding:32px;
+
+}
+
+/* BACK */
+
+.back{
+
+    margin-bottom:20px;
+
+}
+
+.back a{
+
+    text-decoration:none;
+
+    color:#1976d2;
+
+    font-weight:600;
+
+}
+
+/* TITLE */
+
+.title-card{
+
+    background:white;
+
+    border-radius:14px;
+
+    padding:24px;
+
+    box-shadow:0 4px 14px rgba(0,0,0,.05);
+
+    margin-bottom:28px;
+
+}
+
+.title-card h2{
+
+    margin:0;
+
+}
+
+.patient-count{
+
+    color:#666;
+
+    margin-top:8px;
+
+}
+
+/* SEARCH */
+
+.search{
+
+    margin-bottom:28px;
+
+}
+
+.search input{
+
+    width:100%;
+
+    padding:14px;
+
+    border-radius:10px;
+
+    border:1px solid #ccc;
+
+    font-size:15px;
+
+}
+
+/* PATIENT GRID */
+
+.patient-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(auto-fit,minmax(340px,1fr));
+
+    gap:20px;
+
+}
+
+/* CARD */
+
+.patient-card{
+
+    background:white;
+
+    border-radius:14px;
+
+    padding:20px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+    box-shadow:
+        0 4px 14px rgba(0,0,0,.05);
+
+}
+
+.patient-card:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,.08);
+
+}
+
+.patient-name{
+
+    font-size:20px;
+
+    font-weight:600;
+
+}
+
+.patient-bed{
+
+    margin-top:8px;
+
+    color:#666;
+
+}
+
+.status{
+
+    margin-top:18px;
+
+    display:inline-block;
+
+    padding:6px 12px;
+
+    border-radius:20px;
+
+    background:#9e9e9e;
+
+    color:white;
+
+    font-size:13px;
+
+}
+
+/* =====================================
+   PDF gomb
+===================================== */
+
+.title-header{
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+}
+
+.title-header h2{
+
+    flex:1;
+    margin:0;
+
+}
+
+.icon-button{
+
+    width:60px;
+    height:60px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:none;
+    background:transparent;
+
+    cursor:pointer;
+
+    border-radius:8px;
+
+    transition:.2s;
+
+}
+
+#wardPdfButton i{
+
+    font-size:50px;
+    color:#d32f2f;
+    margin-right: 500px;
+
+}
+
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+    <h1>DrugAssist</h1>
+
+    <div class="user-info">
+
+        Gergő |
+        2026.06.24
+
+    </div>
+
+</header>
+
+<div class="container">
+
+    <div class="back">
+
+        <a href="dashboard.html">
+
+            ← Vissza a dashboardra
+
+        </a>
+
+    </div>
+
+    <div class="title-card">
+
+        <div class="title-header">
+
+            <h2 id="wardTitle"></h2>
+
+            <button
+    id="wardPdfButton"
+    class="icon-button"
+    title="Osztályos átadó">
+
+    <i class="fa-solid fa-file-pdf"></i>
+
+</button>
+
+        </div>
+
+        <div
+            class="patient-count"
+            id="patientCount">
+
+        </div>
+
+    </div>
+
+    
+    <div
+        class="patient-grid"
+        id="patientContainer">
+
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="js/config.js"></script>
+
+<script src="js/utils.js"></script>
+
+<script src="js/storage.js"></script>
+
+<script src="js/render.js"></script>
+
+<script src="js/ward-report.js"></script>
+
+<script src="js/ward.js"></script>
+
+</body>
+
+</html>

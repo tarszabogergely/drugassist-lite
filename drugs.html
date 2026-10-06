@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>DrugAssist - Gyógyszerek</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+
+    margin:0;
+    font-family:"Segoe UI",Arial,sans-serif;
+    background:#f4f6f9;
+
+}
+
+header{
+
+    background:white;
+    padding:18px 32px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    border-bottom:1px solid #ddd;
+
+}
+
+header h1{
+
+    margin:0;
+    font-size:22px;
+
+}
+
+.container{
+
+    max-width:900px;
+    margin:auto;
+    padding:30px;
+
+}
+
+.back{
+
+    margin-bottom:25px;
+
+}
+
+.back a{
+
+    text-decoration:none;
+    color:#1976d2;
+    font-weight:600;
+
+}
+
+.modules{
+
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:20px;
+
+}
+
+.module{
+
+    background:white;
+    border-radius:14px;
+    padding:30px;
+    cursor:pointer;
+
+    text-align:center;
+
+    box-shadow:0 4px 14px rgba(0,0,0,.05);
+
+    transition:.2s;
+
+}
+
+.module:hover{
+
+    transform:translateY(-3px);
+
+}
+
+.module-icon{
+
+    font-size:44px;
+    margin-bottom:18px;
+
+}
+
+.module-title{
+
+    font-size:20px;
+    font-weight:600;
+
+}
+
+.module-description{
+
+    margin-top:10px;
+    color:#666;
+    font-size:14px;
+    line-height:1.5;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1>DrugAssist</h1>
+
+<div>
+
+Gyógyszerek
+
+</div>
+
+</header>
+
+<div class="container">
+
+<div class="back">
+
+<a href="dashboard.html">
+
+← Vissza
+
+</a>
+
+</div>
+
+<div class="modules">
+
+<div
+class="module"
+onclick="location.href='converter/drug-db-converter.html'">
+
+<div class="module-icon">
+
+📦
+
+</div>
+
+<div class="module-title">
+
+Gyógyszertörzs konvertáló
+
+</div>
+
+<div class="module-description">
+
+Gyógyszertörzs JSON konvertálása.
+
+</div>
+
+</div>
+
+<div
+class="module"
+onclick="location.href='morphology/morphology-editor.html'">
+
+<div class="module-icon">
+
+🔬
+
+</div>
+
+<div class="module-title">
+
+Morfológia adatbázis
+
+</div>
+
+<div class="module-description">
+
+Gyógyszerek morfológiai adatainak szerkesztése.
+
+</div>
+
+</div>
+
+<div
+class="module"
+onclick="location.href='dev/parser-test.html'">
+
+<div class="module-icon">
+
+🧪
+
+</div>
+
+<div class="module-title">
+
+Parser teszt
+
+</div>
+
+<div class="module-description">
+
+Parser működésének ellenőrzése és tesztelése.
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+
+</html>

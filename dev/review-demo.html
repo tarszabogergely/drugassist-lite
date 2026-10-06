@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>DrugAssist - Gyógyszerészi ellenőrzés</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+
+    margin:0;
+    font-family:"Segoe UI",Arial,sans-serif;
+    background:#f4f6f9;
+
+}
+
+header{
+
+    background:white;
+
+    padding:18px 32px;
+
+    border-bottom:1px solid #e0e0e0;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+header h1{
+
+    margin:0;
+
+    font-size:22px;
+
+}
+
+.user-info{
+
+    color:#666;
+    font-size:14px;
+
+}
+
+.container{
+
+    max-width:1400px;
+    margin:auto;
+    padding:32px;
+
+}
+
+.back{
+
+    margin-bottom:24px;
+
+}
+
+.back a{
+
+    text-decoration:none;
+    color:#1976d2;
+    font-weight:600;
+
+}
+
+.card{
+
+    background:white;
+    border-radius:14px;
+    padding:24px;
+    margin-bottom:24px;
+    box-shadow:0 4px 14px rgba(0,0,0,.05);
+
+}
+
+.patient-name{
+
+    font-size:28px;
+    font-weight:700;
+    margin-bottom:22px;
+
+}
+
+.patient-data{
+
+    display:grid;
+    grid-template-columns:220px 1fr;
+    row-gap:10px;
+
+}
+
+.label{
+
+    color:#666;
+
+}
+
+.review-table{
+
+    width:100%;
+    border-collapse:collapse;
+
+}
+
+.review-table th{
+
+    background:#f5f5f5;
+    padding:12px;
+    border:1px solid #ddd;
+    font-size:14px;
+
+}
+
+.review-table td{
+
+    border:1px solid #ddd;
+    padding:12px;
+    vertical-align:top;
+
+    transition:
+        background-color .35s ease,
+        opacity .25s ease;
+
+}
+
+.drug-cell{
+
+    width:340px;
+
+}
+
+.drug-name{
+
+    font-size:16px;
+    font-weight:600;
+    margin-bottom:8px;
+
+}
+
+.drug-morphology{
+
+    font-size:12px;
+    color:#777;
+    line-height:1.4;
+
+}
+
+.dose{
+
+    text-align:center;
+    font-weight:700;
+    font-size:16px;
+
+}
+
+.check-cell{
+
+    width:70px;
+    text-align:center;
+
+}
+
+.check-button{
+
+    width:36px;
+    height:36px;
+
+    margin:auto;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    border-radius:8px;
+
+    background:#2e7d32;
+    color:white;
+
+    font-size:20px;
+    font-weight:bold;
+
+    cursor:pointer;
+    user-select:none;
+
+    transition:
+        transform .15s,
+        background .25s;
+
+}
+
+.check-button:hover{
+
+    background:#256428;
+    transform:scale(1.08);
+
+}
+
+.reviewed td{
+
+    background:#e8f5e9;
+
+}
+
+.reviewed .drug-name,
+.reviewed .drug-morphology,
+.reviewed .dose{
+
+    opacity:.65;
+
+}
+
+.complete{
+
+    display:flex;
+    justify-content:center;
+    margin-top:30px;
+
+}
+
+.complete button{
+
+    background:#2e7d32;
+    color:white;
+
+    border:none;
+    border-radius:8px;
+
+    padding:14px 34px;
+
+    font-size:17px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.complete button:hover{
+
+    background:#256428;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1>DrugAssist</h1>
+
+<div class="user-info">
+
+Gergő | 2026.07.22
+
+</div>
+
+</header>
+
+<div class="container">
+
+<div class="back">
+
+<a href="review.html">
+
+← Vissza az osztályhoz
+
+</a>
+
+</div>
+
+<section class="card">
+
+<div class="patient-name">
+
+Szabó Krisztián
+
+</div>
+
+<div class="patient-data">
+
+<div class="label">Azonosító</div>
+<div>123456</div>
+
+<div class="label">Osztály</div>
+<div>Általános és Plasztikai Sebészet</div>
+
+<div class="label">Ágy</div>
+<div>23/8</div>
+
+<div class="label">Készítési azonosító</div>
+<div>DA-20260722-OT-083522</div>
+
+<div class="label">Készítette</div>
+<div>Orbán Tünde</div>
+
+
+</div>
+
+</section>
+
+<section class="card">
+
+<h2>
+
+💊 Gyógyszerészi ellenőrzés
+
+</h2>
+
+<table class="review-table">
+
+<thead>
+
+<tr>
+
+<th>Gyógyszer</th>
+
+<th>Éjjel</th>
+
+<th>Hajnal</th>
+
+<th>Reggel</th>
+
+<th>Dél</th>
+
+<th>Délután</th>
+
+<th>Este</th>
+
+<th width="70">✔</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr class="reviewed">
+
+<td class="drug-cell">
+
+<div class="drug-name">
+
+VEROSPIRON 25 mg tabletta
+
+</div>
+
+<div class="drug-morphology">
+
+Fehér, kerek, mindkét oldalán domború tabletta.
+
+</div>
+
+</td>
+
+<td></td>
+
+<td></td>
+
+<td class="dose">1 tbl</td>
+
+</td>
+
+<td></td>
+
+<td class="dose">1 tbl</td>
+
+<td></td>
+
+<td class="check-cell">
+
+    <div class="check-button">
+
+        ✓
+
+    </div>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td class="drug-cell">
+
+<div class="drug-name">
+
+KALDYUM 600 mg retard kapszula
+
+</div>
+
+<div class="drug-morphology">
+
+Narancssárga, hosszúkás retard kapszula.
+
+</div>
+
+</td>
+
+<td></td>
+
+<td></td>
+
+<td class="dose">1 kapsz</td>
+
+<td></td>
+
+<td></td>
+
+<td></td>
+
+<td class="check-cell">
+
+    <div class="check-button">
+
+        ✓
+
+    </div>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td class="drug-cell">
+
+<div class="drug-name">
+
+FURON 40 mg tabletta
+
+</div>
+
+<div class="drug-morphology">
+
+Fehér, kerek tabletta.
+
+</div>
+
+</td>
+
+<td></td>
+
+<td></td>
+
+<td class="dose">1 tbl</td>
+
+<td></td>
+
+<td class="dose">1 tbl</td>
+
+<td></td>
+
+<td class="check-cell">
+
+    <div class="check-button">
+
+        ✓
+
+    </div>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td class="drug-cell">
+
+<div class="drug-name">
+
+BETAGEN 24 mg tabletta
+
+</div>
+
+<div class="drug-morphology">
+
+Fehér, kerek tabletta.
+
+</div>
+
+</td>
+
+<td></td>
+
+<td></td>
+
+<td></td>
+
+<td></td>
+
+<td></td>
+
+<td class="dose">1 tbl</td>
+
+<td class="check-cell">
+
+    <div class="check-button">
+
+        ✓
+
+    </div>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td class="drug-cell">
+
+<div class="drug-name">
+
+IBUMAX 200 mg filmtabletta
+
+</div>
+
+<div class="drug-morphology">
+
+Fehér, hosszúkás filmtabletta.
+
+</div>
+
+</td>
+
+<td></td>
+
+<td></td>
+
+<td class="dose">2 tbl</td>
+
+<td></td>
+
+<td></td>
+
+<td class="dose">2 tbl</td>
+
+<td class="check-cell">
+
+    <div class="check-button">
+
+        ✓
+
+    </div>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td class="drug-cell">
+
+<div class="drug-name">
+
+PERINEVA 4 mg tabletta
+
+</div>
+
+<div class="drug-morphology">
+
+Fehér, ovális tabletta.
+
+</div>
+
+</td>
+
+<td></td>
+
+<td></td>
+
+<td class="dose">1 tbl</td>
+
+<td></td>
+
+<td></td>
+
+<td></td>
+
+<td class="check-cell">
+
+    <div class="check-button">
+
+        ✓
+
+    </div>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</section>
+
+<div class="complete">
+
+<button>
+
+✔ Ellenőrzés lezárása
+
+</button>
+
+</div>
+
+</div>
+
+</body>
+
+</html>

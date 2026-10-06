@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>DrugAssist - Beteg</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+
+    margin:0;
+
+    font-family:"Segoe UI",Arial,sans-serif;
+
+    background:#f4f6f9;
+
+}
+
+/* HEADER */
+
+header{
+
+    background:white;
+
+    padding:18px 32px;
+
+    border-bottom:1px solid #e0e0e0;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+header h1{
+
+    margin:0;
+
+    font-size:22px;
+
+}
+
+.user-info{
+
+    color:#666;
+
+    font-size:14px;
+
+}
+
+/* CONTAINER */
+
+.container{
+
+    max-width:1200px;
+
+    margin:auto;
+
+    padding:32px;
+
+}
+
+/* BACK */
+
+.back{
+
+    margin-bottom:24px;
+
+}
+
+.back a{
+
+    text-decoration:none;
+
+    color:#1976d2;
+
+    font-weight:600;
+
+}
+
+
+.action-row{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:24px;
+
+    margin-bottom:24px;
+
+}
+
+.action-card{
+
+    min-height:180px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    text-align:center;
+
+}
+
+
+.action-card input[type=file]{
+
+    margin-top:16px;
+
+    text-align:center;
+
+}
+
+
+
+/* CARD */
+
+.card{
+
+    background:white;
+
+    border-radius:14px;
+
+    padding:24px;
+
+    margin-bottom:24px;
+
+    box-shadow:0 4px 14px rgba(0,0,0,.05);
+
+}
+
+.card h2{
+
+    margin-top:0;
+
+    margin-bottom:20px;
+
+    font-size:20px;
+
+}
+
+.medication-card{
+
+    border:1px solid #ddd;
+
+    border-radius:10px;
+
+    padding:14px;
+
+    margin-bottom:12px;
+
+    background:white;
+
+}
+
+
+.complete{
+
+    display:flex;
+
+    justify-content:center;
+
+    margin-top:28px;
+
+}
+
+
+/* PATIENT */
+
+.patient-name{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    font-size:28px;
+
+    font-weight:700;
+
+}
+
+#patientVerified{
+
+    display:flex;
+
+    align-items:center;
+
+}
+
+.verified{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    width:28px;
+
+    height:28px;
+
+    border-radius:50%;
+
+    background:#2e7d32;
+
+    color:white;
+
+    font-size:16px;
+
+    font-weight:bold;
+
+    box-shadow:
+        0 2px 6px rgba(46,125,50,.35);
+
+}
+
+.patient-data{
+
+    display:grid;
+
+    grid-template-columns:220px 1fr;
+
+    row-gap:10px;
+
+}
+
+.label{
+
+    color:#666;
+
+}
+
+#patientNote{
+
+    width:100%;
+
+    min-height:100px;
+
+    padding:12px;
+
+    font-size:15px;
+
+    border:1px solid #ccc;
+
+    border-radius:8px;
+
+    resize:vertical;
+
+    box-sizing:border-box;
+
+    font-family:inherit;
+
+}
+
+#patientNote:read-only{
+
+    background:#f5f5f5;
+
+    color:#555;
+
+}
+
+/* BUTTON */
+
+button{
+
+    background:#1976d2;
+
+    color:white;
+
+    border:none;
+
+    border-radius:8px;
+
+    padding:12px 22px;
+
+    cursor:pointer;
+
+    font-size:15px;
+
+}
+
+button:hover{
+
+    background:#1565c0;
+
+}
+
+
+
+.file-button{
+
+    display:inline-block;
+
+    background:#1976d2;
+
+    color:white;
+
+    padding:12px 24px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+    transition:.2s;
+
+}
+
+.file-button:hover{
+
+    background:#1565c0;
+
+}
+
+.selected-file{
+
+    margin-top:12px;
+
+    color:#666;
+
+    font-size:14px;
+
+}
+
+#completeButton.completed {
+
+    background: #cf9d57;
+
+    color: white;
+
+    border-color: #2e7d32;
+
+    cursor: default;
+
+}
+
+
+
+/* PDF */
+
+input[type=file]{
+
+    margin-top:16px;
+
+}
+
+/* EMPTY */
+
+.empty{
+
+    color:#888;
+
+    font-style:italic;
+
+}
+
+/* MEDICATION */
+
+#medicationList{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+
+}
+
+/* BARCODE */
+
+.barcode-box{
+
+    border:2px dashed #bdbdbd;
+
+    border-radius:10px;
+
+    padding:18px;
+
+    text-align:center;
+
+    color:#666;
+
+}
+
+.medication-title{
+
+    font-size:18px;
+
+    font-weight:600;
+
+    margin-bottom:18px;
+
+    padding-bottom:10px;
+
+    border-bottom:1px solid #e5e5e5;
+
+}
+
+.schedule-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(6,1fr);
+
+    row-gap:8px;
+
+    text-align:center;
+
+}
+
+.schedule-header{
+
+    font-size:13px;
+
+    color:#777;
+
+    font-weight:600;
+
+}
+
+.schedule-dose{
+
+    font-size:16px;
+
+    font-weight:700;
+
+    min-height:24px;
+
+}
+
+/* =====================================
+   Gyógyszerkártya
+===================================== */
+
+.medication-card{
+
+    display:grid;
+
+    grid-template-columns:
+        minmax(240px, 1.5fr)
+        150px
+        repeat(6, minmax(60px, 70px));
+
+    align-items:center;
+
+    gap:18px;
+
+    background:white;
+
+    border:2px solid transparent;
+
+    border-radius:12px;
+
+    padding:18px;
+
+    margin-bottom:14px;
+
+    transition:.25s;
+
+    box-shadow:0 2px 6px rgba(0,0,0,.08);
+
+}
+
+.medication-header{
+
+    margin-bottom:18px;
+
+}
+
+.medication-title{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    font-size:18px;
+
+    font-weight:600;
+
+}
+
+.swap-button{
+
+    cursor:pointer;
+
+    font-size:18px;
+
+}
+
+.swap-button:hover{
+
+    transform:scale(1.15);
+
+}
+
+.medication-name{
+
+    display:-webkit-box;
+
+    -webkit-box-orient:vertical;
+
+    -webkit-line-clamp:2;
+
+    overflow:hidden;
+
+    line-height:1.35;
+
+    font-size:15px;
+
+    font-weight:600;
+
+}
+
+.medication-type{
+
+    margin-top:4px;
+
+    margin-left:28px;
+
+    color:#777;
+
+    font-size:14px;
+
+}
+
+.medication-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(6,1fr);
+
+    gap:12px;
+
+}
+
+.period{
+
+    text-align:center;
+
+}
+
+.period-name{
+
+    font-size:13px;
+
+    color:#777;
+
+    margin-bottom:8px;
+
+}
+
+.period-dose{
+
+    font-size:17px;
+
+    font-weight:700;
+
+    min-height:24px;
+
+}
+
+/* ===============================
+   Állapotok
+================================ */
+
+.medication-card.active{
+
+    border-color:#f4b400;
+
+    background:#fff8df;
+
+    animation:
+        activePulse 2s ease-in-out 3;
+
+}
+
+.medication-card.completed{
+
+    border-color:#43a047;
+
+    background:#eef8ef;
+
+}
+
+.status-icon{
+
+    margin-left:auto;
+
+    font-size:22px;
+
+}
+
+.medication-footer{
+
+    margin-top:18px;
+
+    padding-top:14px;
+
+    border-top:1px solid #e5e5e5;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    flex-wrap:wrap;
+
+    gap:8px;
+
+    color:#666;
+
+    font-size:14px;
+
+}
+
+.medication-info{
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+.medication-name-row{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    min-width:0;
+
+}
+
+.lot-column{
+
+    display:grid;
+
+    grid-template-columns:auto 1fr;
+
+    row-gap:6px;
+
+    column-gap:10px;
+
+    font-size:14px;
+
+}
+
+.lot-item{
+
+    color:#666;
+
+    font-weight:600;
+
+}
+
+.lot-value{
+
+    font-weight:600;
+
+}
+
+/*
+=====================================
+Aktív gyógyszer kiemelése
+=====================================
+*/
+
+@keyframes activePulse{
+
+    0%{
+
+        transform:scale(1);
+
+        box-shadow:
+            0 0 0 rgba(255,193,7,0);
+
+    }
+
+    50%{
+
+        transform:scale(1.008);
+
+        box-shadow:
+            0 0 18px rgba(255,193,7,.65);
+
+    }
+
+    100%{
+
+        transform:scale(1);
+
+        box-shadow:
+            0 0 0 rgba(255,193,7,0);
+
+    }
+
+}
+
+
+
+/* =====================================
+Substitution modal
+===================================== */
+
+.modal{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,.45);
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    z-index:1000;
+
+}
+
+.hidden{
+
+    display:none;
+
+}
+
+.modal-content{
+
+    width:420px;
+
+    max-width:90vw;
+
+    background:#fff;
+
+    border-radius:12px;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.3);
+
+    overflow:hidden;
+
+}
+
+.modal-header{
+
+    padding:16px;
+
+    font-size:20px;
+
+    font-weight:bold;
+
+    border-bottom:1px solid #ddd;
+
+}
+
+.modal-body{
+
+    padding:16px;
+
+}
+
+.original-medication{
+
+    font-weight:bold;
+
+    margin-bottom:16px;
+
+}
+
+.sub-item{
+
+    padding:12px;
+
+    border:1px solid #ccc;
+
+    border-radius:8px;
+
+    margin-bottom:8px;
+
+    cursor:pointer;
+
+}
+
+.sub-item.selected{
+
+    border-color:#1976d2;
+
+    background:#e8f2ff;
+
+}
+
+.modal-footer{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:12px;
+
+    padding:16px;
+
+    border-top:1px solid #ddd;
+
+}
+
+
+/* =====================================
+DM Scanner
+===================================== */
+
+
+#scannerInput{
+
+    width:220px;
+
+    padding:6px;
+
+    font-size:16px;
+
+}
+
+
+
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1>DrugAssist</h1>
+
+<div class="user-info">
+
+Gergő | 2026.06.25
+
+</div>
+
+</header>
+
+<div class="container">
+
+<div class="back">
+
+<a href="ward.html">
+
+← Vissza az osztályhoz
+
+</a>
+
+</div>
+
+<!-- BETEG -->
+
+<section class="card">
+
+<div class="patient-name">
+
+    <span id="patientName">
+
+        Beteg neve
+
+    </span>
+
+    <span id="patientVerified"></span>
+
+</div>
+
+<div class="patient-data">
+
+<div class="label">
+
+Azonosító
+
+</div>
+
+<div id="patientId">
+
+-
+
+</div>
+
+<div class="label">
+
+Osztály
+
+</div>
+
+<div id="patientWard">
+
+-
+
+</div>
+
+<div class="label">
+
+Ágy
+
+</div>
+
+<div id="patientBed">
+
+-
+
+</div>
+
+<div class="label">
+
+Készítési azonosító
+
+</div>
+
+<div id="preparationId">
+
+-
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<div class="action-row">
+
+<!-- CÍMKE -->
+
+<section class="card action-card">
+
+<h2>
+
+🖨 Betegazonosító címke
+
+</h2>
+
+<button id="printLabelButton">
+
+Címke nyomtatása
+
+</button>
+
+</section>
+
+<!-- PDF -->
+
+<section class="card action-card">
+
+<h2>
+
+📄 Gyógyszerelési lista
+
+</h2>
+
+<input
+    type="file"
+    id="patientPdfInput"
+    accept=".pdf"
+    hidden>
+
+<label
+    for="patientPdfInput"
+    class="file-button">
+
+    📂 PDF kiválasztása
+
+</label>
+
+</section>
+
+<!-- =====================================
+DM beolvasás
+===================================== -->
+
+<section class="card action-card">
+
+<h2>
+
+📦 Vonalkód beolvasás
+
+</h2>
+
+    <input
+        id="scannerInput"
+        type="text"
+        autocomplete="off"
+        spellcheck="false">
+
+</section>
+
+</div>
+
+
+
+
+<!-- GYÓGYSZEREK -->
+
+<section class="card">
+
+<h2>
+
+💊 Gyógyszerek
+
+</h2>
+
+<div
+id="medicationList"
+class="empty">
+
+Még nincs importált gyógyszer.
+
+</div>
+
+
+</section>
+
+<!-- MEGJEGYZÉS -->
+
+<div class="card">
+
+<h3>📝 Megjegyzés</h3>
+
+<textarea
+    id="patientNote"
+    rows="4"
+    placeholder="A megjegyzés szövege..."
+></textarea>
+
+</div>
+
+<!-- LEZÁRÁS -->
+
+<div class="complete">
+
+<button
+id="completeButton">
+
+Gyógyszerelés lezárása
+
+</button>
+
+</div>
+
+</div>
+
+<!-- =====================================
+Helyettesítési modal
+===================================== -->
+
+<div id="substitutionModal" class="modal hidden">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            🔄 Gyógyszer helyettesítése
+
+        </div>
+
+        <div class="modal-body">
+
+            <div id="originalMedication"
+                 class="original-medication">
+
+            </div>
+
+            <div id="substitutionList">
+
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+
+            <button id="subCancel">
+
+                Mégse
+
+            </button>
+
+            <button id="subOk">
+
+                Alkalmaz
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="js/config.js"></script>
+
+<script src="js/utils.js"></script>
+
+<script src="js/storage.js"></script>
+
+<script src="js/render.js"></script>
+
+<script src="js/pdf.min.js"></script>
+
+<script src="js/modules/preparation.js"></script>
+
+<script src="js/modules/label-template.js"></script>
+
+<script src="js/modules/label.js"></script>
+
+<script src="js/modules/pdf-layout-parser.js"></script>
+
+<script src="js/modules/medication-locator.js"></script>
+
+<script src="js/modules/medication-merger.js"></script>
+
+<script src="js/modules/drug-database.js"></script>
+
+<script src="js/modules/medication-parser.js"></script>
+
+<script src="js/pdf-import.js"></script>
+
+<script src="js/modules/patient-pdf-parser.js"></script>
+
+<script src="js/modules/substitution-modal.js"></script>
+
+<script src="js/modules/dm-parser.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js"></script>
+
+<script src="js/pdf-report.js"></script>
+
+<script src="js/modules/dm-input.js"></script>
+
+<script src="js/patient.js"></script>
+
+</body>
+</html>

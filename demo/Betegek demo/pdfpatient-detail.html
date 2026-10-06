@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>DrugAssist – Beteg gyógyszerelési lap</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    margin:40px;
+    color:#000;
+}
+
+/* ===== HEADER ===== */
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:25px;
+}
+
+.header-left{
+    font-size:14px;
+}
+
+.header-right{
+    text-align:right;
+    font-size:13px;
+}
+
+.identifier{
+    font-size:16px;
+    font-weight:bold;
+    margin-bottom:6px;
+}
+
+.barcode-box{
+    border:1px solid #000;
+    padding:10px;
+    margin-top:6px;
+    font-size:12px;
+}
+
+/* ===== PATIENT INFO BOX ===== */
+
+.patient-box{
+    border:1px solid #000;
+    padding:15px;
+    margin-bottom:20px;
+}
+
+.patient-name{
+    font-size:20px;
+    font-weight:bold;
+    margin-bottom:8px;
+}
+
+.patient-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:6px 20px;
+    font-size:14px;
+}
+
+/* ===== TIMELINE ===== */
+
+.timeline{
+    border:1px solid #000;
+    padding:12px;
+    margin-bottom:20px;
+}
+
+.timeline-title{
+    font-weight:bold;
+    margin-bottom:8px;
+}
+
+.timeline-item{
+    margin-bottom:6px;
+    font-size:13px;
+}
+
+/* ===== WARNING BOX ===== */
+
+.warning-box{
+    border:2px solid #000;
+    padding:12px;
+    margin-bottom:20px;
+}
+
+.warning-title{
+    font-weight:bold;
+    font-size:14px;
+    margin-bottom:6px;
+}
+
+/* ===== MEDICATION TABLE ===== */
+
+.med-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-bottom:20px;
+}
+
+.med-table th,
+.med-table td{
+    border:1px solid #000;
+    padding:6px;
+    font-size:12px;
+}
+
+.med-table th{
+    background:#f0f0f0;
+}
+
+.dose-center{
+    text-align:center;
+}
+
+.note-row{
+    font-style:italic;
+    font-size:11px;
+}
+
+/* ===== BATCH ROW ===== */
+
+.batch-row{
+    font-size:11px;
+    font-style:italic;
+}
+
+/* ===== GENERAL NOTE ===== */
+
+.general-note{
+    border:1px solid #000;
+    padding:12px;
+    margin-bottom:20px;
+}
+
+.general-note-title{
+    font-weight:bold;
+    margin-bottom:6px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+
+<div class="header">
+
+    <div class="header-left">
+        <div><strong>DrugAssist</strong></div>
+        <div>Intézmény neve</div>
+        <div><strong>Dátum:</strong> 2026.02.27</div>
+    </div>
+
+    <div class="header-right">
+        <div class="identifier">Gyógyszerelés azonosító:</div>
+        MED-20260227-00034
+        <div class="barcode-box">
+            [ CODE128 VONALKÓD HELYE ]
+        </div>
+    </div>
+
+</div>
+
+<!-- PATIENT INFO -->
+
+<div class="patient-box">
+    <div class="patient-name">Kovács János</div>
+
+    <div class="patient-grid">
+        <div><strong>TAJ:</strong> 123456789</div>
+        <div><strong>Születési dátum:</strong> 1958.04.12</div>
+        <div><strong>Osztály:</strong> Belgyógyászat</div>
+        <div><strong>Ágy:</strong> 12/B</div>
+    </div>
+</div>
+
+<!-- TIMELINE -->
+
+<div class="timeline">
+    <div class="timeline-title">Folyamat állapota</div>
+
+    <div class="timeline-item">
+        ✔ Jóváhagyva – Dr. Kovács Anna – 2026.02.27 08:12
+    </div>
+
+    <div class="timeline-item">
+        ✔ Gyógyszerelve – Szabó Éva – 2026.02.27 09:45
+    </div>
+
+    <div class="timeline-item">
+        ✔ Ellenőrizve – Dr. Kovács Anna – 2026.02.27 10:12
+    </div>
+</div>
+
+<!-- WARNING -->
+
+<div class="warning-box">
+    <div class="warning-title">⚠ MÓDOSÍTOTT RENDELÉS</div>
+    Az alábbi gyógyszerek gyógyszerész által kerültek hozzáadásra.
+    A gyógyszerek megegyeznek a lázlapon szereplőkkel.
+</div>
+
+<!-- MEDICATION TABLE -->
+
+<table class="med-table">
+<thead>
+<tr>
+    <th>Rendelt gyógyszer</th>
+    <th>R</th><th>D</th><th>E</th><th>É</th>
+    <th>Expediált gyógyszer</th>
+    <th>R</th><th>D</th><th>E</th><th>É</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+    <td>Paracetamol 500 mg</td>
+    <td class="dose-center">1</td>
+    <td class="dose-center">1</td>
+    <td class="dose-center">1</td>
+    <td class="dose-center">0</td>
+
+    <td>
+        Paracetamol 500 mg
+        <div class="batch-row">
+            Gyártási szám: ABC123 | Lejárat: 2027.04.30
+        </div>
+    </td>
+
+    <td class="dose-center">1</td>
+    <td class="dose-center">1</td>
+    <td class="dose-center">1</td>
+    <td class="dose-center">0</td>
+</tr>
+
+<tr>
+    <td colspan="10" class="note-row">
+        Megjegyzés: Interakció ellenőrizve, dózis validálva.
+    </td>
+</tr>
+
+</tbody>
+</table>
+
+<!-- GENERAL NOTE -->
+
+<div class="general-note">
+    <div class="general-note-title">Általános megjegyzés</div>
+    A beteg állapota stabil, a rendelt és expediált gyógyszerek egyeznek.
+</div>
+
+</body>
+</html>

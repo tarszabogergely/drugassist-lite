@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>DrugAssist – Kimutatások</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+    margin:0;
+    font-family:"Segoe UI",Arial,sans-serif;
+    background:#f4f6f9;
+}
+
+header{
+    background:white;
+    padding:14px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid #e0e0e0;
+}
+
+h1{
+    margin:0;
+    font-size:20px;
+}
+
+.header-right{
+    color:#666;
+    font-size:14px;
+}
+
+.container{
+    padding:30px;
+}
+
+.card{
+
+    background:white;
+    border-radius:12px;
+    padding:24px;
+    margin-bottom:24px;
+    box-shadow:0 4px 14px rgba(0,0,0,.05);
+
+}
+
+.section-title{
+
+    font-size:18px;
+    font-weight:600;
+    margin-bottom:18px;
+
+}
+
+.filters{
+
+    display:grid;
+    grid-template-columns:180px 180px auto;
+    gap:20px;
+    align-items:end;
+
+}
+
+label{
+
+    display:block;
+    margin-bottom:6px;
+    font-size:14px;
+    color:#555;
+
+}
+
+input,
+select{
+
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:14px;
+    box-sizing:border-box;
+
+}
+
+button{
+
+    background:#1976d2;
+    color:white;
+    border:none;
+    padding:11px 22px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:14px;
+
+}
+
+button:hover{
+
+    background:#1565c0;
+
+}
+
+.grid{
+
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:16px;
+
+}
+
+.report-box{
+
+    border:1px solid #e5e5e5;
+    border-radius:10px;
+    padding:18px;
+    cursor:pointer;
+    transition:.2s;
+
+}
+
+.report-box:hover{
+
+    border-color:#1976d2;
+    background:#f8fbff;
+
+}
+
+.report-title{
+
+    font-weight:600;
+    margin-bottom:8px;
+
+}
+
+.report-desc{
+
+    color:#666;
+    font-size:13px;
+    line-height:1.5;
+
+}
+
+table{
+
+    width:100%;
+    border-collapse:collapse;
+
+}
+
+th{
+
+    background:#f0f2f5;
+    text-align:left;
+    padding:12px;
+    font-size:14px;
+
+}
+
+td{
+
+    padding:12px;
+    border-top:1px solid #eee;
+    font-size:14px;
+
+}
+
+.summary{
+
+    display:flex;
+    gap:40px;
+    margin-top:20px;
+    font-weight:600;
+
+}
+
+.export{
+
+    display:flex;
+    gap:12px;
+
+}
+
+.export button{
+
+    background:#4caf50;
+
+}
+
+.export button:nth-child(2){
+
+    background:#ff9800;
+
+}
+
+.export button:nth-child(3){
+
+    background:#607d8b;
+
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<h1>📊 DrugAssist – Kimutatások</h1>
+
+<div class="header-right">
+Dr. Kovács Anna
+</div>
+
+</header>
+
+<div class="container">
+
+<div class="card">
+
+<div class="section-title">
+
+Időszak
+
+</div>
+
+<div class="filters">
+
+<div>
+
+<input type="date">
+
+</div>
+
+<div>
+
+<input type="date">
+
+</div>
+
+<div>
+
+<button>Kimutatás készítése</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="section-title">
+
+Kimutatás típusa
+
+</div>
+
+<div class="grid">
+
+<div class="report-box">
+
+<div class="report-title">
+🏥 Osztályok gyógyszerfelhasználása
+</div>
+
+<div class="report-desc">
+Betegszám, gyógyszerelések száma,
+tabletták, készítmények,
+osztályonkénti összesítés.
+</div>
+
+</div>
+
+<div class="report-box">
+
+<div class="report-title">
+💊 Gyógyszer statisztika
+</div>
+
+<div class="report-desc">
+Leggyakrabban készített gyógyszerek,
+felhasználás,
+betegszám.
+</div>
+
+</div>
+
+<div class="report-box">
+
+<div class="report-title">
+👤 Beteg statisztika
+</div>
+
+<div class="report-desc">
+Gyógyszerelések száma
+betegenként,
+utolsó gyógyszerelés.
+</div>
+
+</div>
+
+<div class="report-box">
+
+<div class="report-title">
+👩‍🔬 Asszisztensek teljesítménye
+</div>
+
+<div class="report-desc">
+Elkészített gyógyszerelések,
+tabletták,
+készítmények.
+</div>
+
+</div>
+
+<div class="report-box">
+
+<div class="report-title">
+👨‍⚕️ Gyógyszerészek teljesítménye
+</div>
+
+<div class="report-desc">
+Ellenőrzött gyógyszerelések,
+átlagos ellenőrzési idő.
+</div>
+
+</div>
+
+<div class="report-box">
+
+<div class="report-title">
+🏥 Intézményi összesítő
+</div>
+
+<div class="report-desc">
+Teljes időszak összesített
+statisztikái.
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="section-title">
+
+Demo kimutatás
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Osztály</th>
+<th>Betegek</th>
+<th>Gyógyszerelések</th>
+<th>Tabletták</th>
+<th>Készítmények</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>Belgyógyászat</td>
+<td>132</td>
+<td>418</td>
+<td>6215</td>
+<td>344</td>
+
+</tr>
+
+<tr>
+
+<td>Sebészet</td>
+<td>96</td>
+<td>286</td>
+<td>4210</td>
+<td>198</td>
+
+</tr>
+
+<tr>
+
+<td>Gyermekosztály</td>
+<td>88</td>
+<td>241</td>
+<td>2634</td>
+<td>162</td>
+
+</tr>
+
+<tr>
+
+<td>Neurológia</td>
+<td>51</td>
+<td>168</td>
+<td>2014</td>
+<td>118</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<div class="summary">
+
+<div>
+
+Összes beteg:
+<strong>367</strong>
+
+</div>
+
+<div>
+
+Gyógyszerelések:
+<strong>1113</strong>
+
+</div>
+
+<div>
+
+Tabletták:
+<strong>15073</strong>
+
+</div>
+
+<div>
+
+Készítmények:
+<strong>822</strong>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="section-title">
+
+Exportálás
+
+</div>
+
+<div class="export">
+
+<button>📄 PDF export</button>
+
+<button>📊 CSV export</button>
+
+<button>🖨 Nyomtatás</button>
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>

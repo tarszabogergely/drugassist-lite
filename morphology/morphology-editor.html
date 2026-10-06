@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>DrugAssist - Morfológia adatbázis</title>
+
+<style>
+
+*{
+
+    box-sizing:border-box;
+
+}
+
+body{
+
+    margin:0;
+    font-family:"Segoe UI",Arial,sans-serif;
+    background:#f4f6f9;
+    color:#333;
+
+}
+
+/* ================= HEADER ================= */
+
+header{
+
+    background:white;
+
+    padding:18px 32px;
+
+    display:flex;
+
+    justify-content:space-between;
+    align-items:center;
+
+    border-bottom:1px solid #ddd;
+
+}
+
+header h1{
+
+    margin:0;
+    font-size:22px;
+
+}
+
+.header-right{
+
+    color:#666;
+    font-size:15px;
+
+}
+
+/* ================= LOADER ================= */
+
+#loader{
+
+    max-width:700px;
+    margin:40px auto;
+
+}
+
+.loader-card{
+
+    background:white;
+    border-radius:14px;
+    padding:30px;
+
+    box-shadow:0 4px 18px rgba(0,0,0,.08);
+
+}
+
+.loader-card h2{
+
+    margin-top:0;
+    margin-bottom:30px;
+
+}
+
+.section{
+
+    margin-bottom:25px;
+
+}
+
+label{
+
+    display:block;
+
+    margin-bottom:8px;
+
+    font-weight:600;
+
+}
+
+input[type=file]{
+
+    width:100%;
+
+}
+
+button{
+
+    border:none;
+    border-radius:8px;
+
+    padding:12px 28px;
+
+    font-size:16px;
+    font-weight:600;
+
+    cursor:pointer;
+
+    background:#2e7d32;
+    color:white;
+
+    transition:.2s;
+
+}
+
+button:hover{
+
+    background:#256428;
+
+}
+
+/* ================= MAIN ================= */
+
+#container{
+
+    display:none;
+
+    height:calc(100vh - 69px);
+
+}
+
+/* ================= LEFT ================= */
+
+#left{
+
+    width:360px;
+
+    background:white;
+
+    border-right:1px solid #ddd;
+
+    display:flex;
+    flex-direction:column;
+
+}
+
+#search{
+
+    margin:15px;
+    padding:12px;
+
+    font-size:15px;
+
+    border:1px solid #ccc;
+    border-radius:8px;
+
+}
+
+#drugList{
+
+    flex:1;
+    overflow:auto;
+
+}
+
+.drug{
+
+    padding:14px 18px;
+
+    cursor:pointer;
+
+    border-bottom:1px solid #eee;
+
+    transition:.15s;
+
+}
+
+.drug:hover{
+
+    background:#f2f7ff;
+
+}
+
+.selected{
+
+    background:#d9ecff;
+    font-weight:600;
+
+}
+
+/* ================= RIGHT ================= */
+
+#right{
+
+    flex:1;
+
+    padding:30px;
+
+    overflow:auto;
+
+}
+
+.card{
+
+    background:white;
+
+    border-radius:14px;
+
+    padding:30px;
+
+    box-shadow:0 4px 18px rgba(0,0,0,.08);
+
+}
+
+.card h2{
+
+    margin-top:0;
+    margin-bottom:25px;
+
+}
+
+input[type=text]{
+
+    width:100%;
+
+    padding:12px;
+
+    font-size:15px;
+
+    border:1px solid #ccc;
+    border-radius:8px;
+
+}
+
+textarea{
+
+    width:100%;
+    height:260px;
+
+    padding:12px;
+
+    font-size:15px;
+
+    border:1px solid #ccc;
+    border-radius:8px;
+
+    resize:vertical;
+
+}
+
+.save{
+
+    margin-top:30px;
+
+    text-align:right;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1>
+
+DrugAssist
+
+</h1>
+
+<div class="header-right">
+
+Morfológia adatbázis
+
+</div>
+
+</header>
+
+<!-- ================= LOADER ================= -->
+
+<div id="loader">
+
+<div class="loader-card">
+
+<h2>
+
+📋 Adatbázis megnyitása
+
+</h2>
+
+<div class="section">
+
+<label>
+
+Gyógyszertörzs
+(Drug-database.json)
+
+</label>
+
+<input
+type="file"
+id="databaseFile"
+accept=".json">
+
+</div>
+
+<div class="section">
+
+<label>
+
+Morfológia adatbázis
+(Drug-morphology.json)
+
+</label>
+
+<input
+type="file"
+id="morphologyFile"
+accept=".json">
+
+</div>
+
+<button id="loadButton">
+
+Megnyitás
+
+</button>
+
+</div>
+
+</div>
+
+<!-- ================= EDITOR ================= -->
+
+<div id="container">
+
+<div id="left">
+
+<input
+
+id="search"
+
+type="text"
+
+placeholder="🔍 Gyógyszer keresése">
+
+<div id="drugList"></div>
+
+</div>
+
+<div id="right">
+
+<div class="card">
+
+<h2>
+
+💊 Gyógyszer
+
+</h2>
+
+<label>
+
+Név
+
+</label>
+
+<input
+
+id="drugName"
+
+type="text"
+
+readonly>
+
+<label>
+
+EAN
+
+</label>
+
+<input
+
+id="drugEAN"
+
+type="text"
+
+readonly>
+
+<label>
+
+Morfológiai leírás
+
+</label>
+
+<textarea
+
+id="description"
+
+placeholder="Fehér, mindkét oldalán domború, hosszúkás filmtabletta...">
+
+</textarea>
+
+<div class="save">
+
+<button id="saveButton">
+
+✔ Mentés
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="morphology-editor.js"></script>
+
+</body>
+</html>
