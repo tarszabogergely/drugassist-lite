@@ -33,9 +33,9 @@ const CONFIG = {
 
     supabase: {
 
-        url: "https://YOUR_SUPABASE_PROJECT_URL.supabase.co",
+        url: "https://svwwtslwyeevhskcwllx.supabase.co",
 
-        anonKey: "YOUR_SUPABASE_ANON_KEY"
+        anonKey: "sb_publishable_KwUpBix8qaL8dKccA-Hq1w_xf22Qdzx"
 
     },
 
