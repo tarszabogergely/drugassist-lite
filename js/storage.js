@@ -43,7 +43,13 @@ async loadWards() {
     async mergeWard(wardData) {
         if (!wardData) return false;
 
-        if (typeof supabase !== "undefined" && supabase) {
+        // Ellenőrizzük, hogy a Supabase kliens valóban inicializálva van-e
+        const isSupabaseReady = typeof supabase !== "undefined" && 
+                                supabase && 
+                                typeof supabase.from === "function" &&
+                                !CONFIG.supabase.url.includes("YOUR_SUPABASE");
+
+        if (isSupabaseReady) {
             try {
                 const { error } = await supabase
                     .from('wards')
@@ -51,11 +57,11 @@ async loadWards() {
 
                 if (error) console.error("Hiba az osztály Supabase mentésekor:", error);
             } catch (err) {
-                console.error("Supabase csatlakozási hiba:", err);
+                console.warn("Supabase mentési hiba, váltás helyi tárolóra:", err);
             }
         }
 
-        // Helyi mentés frissítése
+        // Helyi mentés frissítése (LocalStorage)
         const wards = await this.loadWards();
         const existingIndex = wards.findIndex(w => w.wardCode === wardData.wardCode);
 
