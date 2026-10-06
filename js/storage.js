@@ -1,468 +1,149 @@
 /*
 =========================================
-DrugAssist
-
-Fájl:
-storage.js
-
-Feladata:
-Adatok mentése és betöltése.
-
-Jelenleg:
-LocalStorage
-
-Később:
-SQLite vagy szerver is lehet.
-
-Fejlesztő:
-Tarszabó Gergely + ChatGPT
-
-Verzió:
-1.0.0
-
+DrugAssist - storage.js
+Supabase Adatkezelő Modul
 =========================================
-*/
-
-/*
-Megjegyzés:
-
-A WARDS mindig tömb.
-
-Még akkor is, ha csak egyetlen
-osztály van importálva.
-
-Ennek célja a későbbi
-több osztály kezelésének
-egyszerű támogatása.
 */
 
 const Storage = {
 
- /*
-=====================================
-OSZTÁLYOK
-=====================================
-*/
+    // --- 1. BETEGEK ÉS MEGRENDELÉSEK LEKÉRDEZÉSE ---
 
-saveWards(wards) {
-
-    localStorage.setItem(
-
-        CONFIG.storage.WARDS,
-
-        JSON.stringify(wards)
-
-    );
-
-},
-
-
-loadWards() {
-
-    const data = localStorage.getItem(
-        CONFIG.storage.WARDS
-    );
-
-    if (!data) {
-
-        return [];
-
-    }
-
-    return JSON.parse(data);
-
-},
-
-
-clearWards() {
-
-    localStorage.removeItem(
-        CONFIG.storage.WARDS
-    );
-
-},
-
-
-/*
-=====================================
-Osztály összevonása
-=====================================
-*/
-
-mergeWard(newWard) {
-
-    const wards = this.loadWards();
-
-    const oldWard = wards.find(
-
-        w => w.wardCode === newWard.wardCode
-
-    );
-
-    // Ha még nincs ilyen osztály
-
-if (!oldWard) {
-
-    newWard.importDate =
-        Utils.getToday();
-
-    wards.push(newWard);
-
-    this.saveCurrentWard(
-        newWard.wardCode
-    );
-
-    this.saveWards(wards);
-
-    return;
-
-}
-
-    // Minden régi beteg ideiglenesen elhagyta az osztályt
-
-    oldWard.patients.forEach(patient => {
-
-        patient.onWard = false;
-
-    });
-
-    // Új lista feldolgozása
-
-    newWard.patients.forEach(newPatient => {
-
-        const oldPatient = oldWard.patients.find(
-
-            p => p.patientId === newPatient.patientId
-
-        );
-
-        if (!oldPatient) {
-
-            oldWard.patients.push(newPatient);
-
-            return;
-
+    // Beteglista lekérése (opcionálisan osztály szerint szűrve)
+    async getPatients(ward = null) {
+        if (!supabase) return [];
+        let query = supabase.from('patients').select('*');
+        if (ward) {
+            query = query.eq('ward', ward);
         }
-
-        // Frissülő adatok
-
-        oldPatient.name = newPatient.name;
-
-        oldPatient.bed = newPatient.bed;
-
-        oldPatient.wardName = newPatient.wardName;
-
-        oldPatient.lastImport = Utils.getToday();
-
-oldPatient.onWard = true;
-
-// Új munkanap?
-
-if (oldPatient.workDate !== Utils.getToday()) {
-
-    oldPatient.workDate = null;
-
-    oldPatient.preparation = null;
-
-    oldPatient.status = CONFIG.status.NEW;
-
-}
-
-    });
-
-    this.saveWards(wards);
-
-},
-
-
-/*
-=====================================
-Beteg mentése
-=====================================
-*/
-
-savePatient(patient) {
-
-    const wards = this.loadWards();
-
-    for (const ward of wards) {
-
-        const index = ward.patients.findIndex(
-
-            p => p.patientId === patient.patientId
-
-        );
-
-        if (index !== -1) {
-
-            ward.patients[index] = patient;
-
-            break;
-
+        const { data, error } = await query;
+        if (error) {
+            console.error('Hiba a betegek lekérdezésekor:', error);
+            return [];
         }
-
-    }
-
-    this.saveWards(wards);
-
-},
-
-
-/*
-=====================================
-Aktuális osztály
-=====================================
-*/
-
-saveCurrentWard(wardCode) {
-
-    localStorage.setItem(
-
-        CONFIG.storage.CURRENT_WARD,
-
-        wardCode
-
-    );
-
-},
-
-
-loadCurrentWard() {
-
-    return localStorage.getItem(
-
-        CONFIG.storage.CURRENT_WARD
-
-    );
-
-},
-
-/*
-=====================================
-Munkanap
-=====================================
-*/
-
-saveWorkDate(date) {
-
-    localStorage.setItem(
-
-        CONFIG.storage.WORK_DATE,
-
-        date
-
-    );
-
-},
-
-loadWorkDate() {
-
-    return localStorage.getItem(
-
-        CONFIG.storage.WORK_DATE
-
-    );
-
-},
-
-/*
-=====================================
-Aktuális beteg
-=====================================
-*/
-
-saveCurrentPatient(patientId) {
-
-    localStorage.setItem(
-
-        CONFIG.storage.CURRENT_PATIENT,
-
-        patientId
-
-    );
-
-},
-
-
-loadCurrentPatient() {
-
-    return localStorage.getItem(
-
-        CONFIG.storage.CURRENT_PATIENT
-
-    );
-
-},
-
-/*
-=====================================
-Aktuális beteg betöltése
-=====================================
-*/
-
-loadPatient() {
-
-    const patientId =
-
-        this.loadCurrentPatient();
-
-    if (!patientId) {
-
-        return null;
-
-    }
-
-    const wards =
-
-        this.loadWards();
-
-    for (const ward of wards) {
-
-        const patient =
-
-            ward.patients.find(
-
-                p => p.patientId === patientId
-
-            );
-
-        if (patient) {
-
-            return patient;
-
-        }
-
-    }
-
-    return null;
-
-},
-
-
-
-    /*
-    =====================================
-    USER
-    =====================================
-    */
-
-    saveUser(user) {
-
-        localStorage.setItem(
-
-            CONFIG.storage.USER,
-
-            JSON.stringify(user)
-
-        );
-
+        return data || [];
     },
 
+    // Megrendelések/Gyógyszerek lekérése státusz alapján ('pending', 'prepared', stb.)
+    async getOrdersByStatus(status = 'pending') {
+        if (!supabase) return [];
+        const { data, error } = await supabase
+            .from('medication_orders')
+            .select(`
+                *,
+                patients ( name, room, ward )
+            `)
+            .eq('status', status);
 
-    loadUser() {
+        if (error) {
+            console.error('Hiba a megrendelések lekérésénél:', error);
+            return [];
+        }
+        return data || [];
+    },
 
-        const data =
+    // --- 2. ADATOK MENTÉSE (PDF IMPORTÁLÁS UTÁN) ---
 
-            localStorage.getItem(
+    async savePatientWithOrders(patientData, ordersList) {
+        if (!supabase) return false;
 
-                CONFIG.storage.USER
+        // 1. Beteg mentése vagy frissítése (upsert patient_code alapján)
+        const { data: patient, error: pError } = await supabase
+            .from('patients')
+            .upsert({
+                patient_code: patientData.patient_code || patientData.id,
+                name: patientData.name,
+                ward: patientData.ward,
+                room: patientData.room
+            }, { onConflict: 'patient_code' })
+            .select()
+            .single();
 
-            );
+        if (pError) {
+            console.error('Hiba a beteg mentésekor:', pError);
+            return false;
+        }
 
-        if (!data) {
+        // 2. Megrendelt gyógyszerek beszúrása a beteghez
+        const formattedOrders = ordersList.map(order => ({
+            patient_id: patient.id,
+            raw_drug_name: order.raw_drug_name || order.name,
+            normalized_name: order.normalized_name || order.name,
+            dosage: order.dosage,
+            quantity: order.quantity || 1,
+            ward: patientData.ward,
+            status: 'pending'
+        }));
 
+        const { error: oError } = await supabase
+            .from('medication_orders')
+            .insert(formattedOrders);
+
+        if (oError) {
+            console.error('Hiba a gyógyszerek mentésekor:', oError);
+            return false;
+        }
+
+        return true;
+    },
+
+    // --- 3. STÁTUSZ MÓDOSÍTÁSA (Előkészítés / Ellenőrzés) ---
+
+    async updateOrderStatus(orderId, newStatus) {
+        if (!supabase) return null;
+        const { data, error } = await supabase
+            .from('medication_orders')
+            .update({ status: newStatus })
+            .eq('id', orderId)
+            .select();
+
+        if (error) {
+            console.error('Hiba a státusz frissítésekor:', error);
             return null;
+        }
+        return data;
+    },
 
+    // --- 4. ARCHIVÁLÁS / ELVÉGZETT FELADATOK ---
+
+    async completeOrder(orderData, user = { name: 'Rendszer', reviewer: 'Rendszer' }) {
+        if (!supabase) return false;
+
+        // 1. Beszúrás a completed_tasks táblába
+        const { error: cError } = await supabase
+            .from('completed_tasks')
+            .insert([{
+                order_id: orderData.id,
+                patient_name: orderData.patient_name || orderData.patients?.name || 'Ismeretlen',
+                drug_name: orderData.normalized_name || orderData.raw_drug_name,
+                prepared_by: user.name,
+                reviewed_by: user.reviewer
+            }]);
+
+        if (cError) {
+            console.error('Hiba az archiváláskor:', cError);
+            return false;
         }
 
-        return JSON.parse(data);
-
+        // 2. Eredeti tétel státuszának frissítése 'completed'-re
+        await this.updateOrderStatus(orderData.id, 'completed');
+        return true;
     },
 
+    // --- 5. GYÓGYSZERTÖRZSKERESÉS ---
 
-    logout() {
+    async searchDrug(term) {
+        if (!supabase) return [];
+        const { data, error } = await supabase
+            .from('drug_database')
+            .select('*')
+            .ilike('name', `%${term}%`)
+            .limit(20);
 
-        localStorage.removeItem(
-
-            CONFIG.storage.USER
-
-        );
-
-    },
-
-
-
-    /*
-    =====================================
-    SETTINGS
-    =====================================
-    */
-
-    saveSettings(settings) {
-
-        localStorage.setItem(
-
-            CONFIG.storage.SETTINGS,
-
-            JSON.stringify(settings)
-
-        );
-
-    },
-
-
-    loadSettings() {
-
-        const data =
-
-            localStorage.getItem(
-
-                CONFIG.storage.SETTINGS
-
-            );
-
-        if (!data) {
-
-            return null;
-
+        if (error) {
+            console.error('Hiba a keresésben:', error);
+            return [];
         }
-
-        return JSON.parse(data);
-
-    },
-
-
-
-    /*
-    =====================================
-    Összes DrugAssist adat törlése
-    =====================================
-    */
-
-clearAll() {
-
-    this.clearWards();
-
-    this.logout();
-
-    localStorage.removeItem(
-
-        CONFIG.storage.SETTINGS
-
-    );
-
-    localStorage.removeItem(
-
-        CONFIG.storage.CURRENT_WARD
-
-    );
-
-    localStorage.removeItem(
-
-        CONFIG.storage.CURRENT_PATIENT
-
-    );
-
-}
-
+        return data || [];
+    }
 };
