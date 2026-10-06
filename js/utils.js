@@ -12,8 +12,7 @@ Fejlesztő:
 Tarszabó Gergely + ChatGPT
 
 Verzió:
-1.0.0
-
+2.0.0
 =========================================
 */
 
@@ -36,8 +35,6 @@ const Utils = {
         );
 
     },
-
-
 
     /*
     --------------------------------------
@@ -65,16 +62,12 @@ const Utils = {
 
     },
 
-
-
     /*
     --------------------------------------
     Egyedi címkeazonosító
-
     DA260624000001
     --------------------------------------
     */
-
     generateLabelCode(counter = 1) {
 
         const d = new Date();
@@ -89,7 +82,7 @@ const Utils = {
 
         return (
 
-            CONFIG.label.barcodePrefix +
+            (CONFIG.label?.barcodePrefix || "DA") +
 
             date +
 
@@ -99,37 +92,40 @@ const Utils = {
 
     },
 
-
-
     /*
     --------------------------------------
-    GUID
-
-    Ha egyszer kelleni fog
+    GUID / UUID generálás
     --------------------------------------
     */
-
     uuid() {
 
-        return crypto.randomUUID();
+        if (typeof crypto !== "undefined" && crypto.randomUUID) {
+
+            return crypto.randomUUID();
+
+        }
+
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+
+            const r = Math.random() * 16 | 0;
+
+            const v = c === "x" ? r : (r & 0x3 | 0x8);
+
+            return v.toString(16);
+
+        });
 
     },
-
-
 
     /*
     --------------------------------------
     Név formázása
-
-    pharma gergő
-
-    →
-
-    Pharma Gergő
+    pharma gergő -> Pharma Gergő
     --------------------------------------
     */
-
     capitalize(text) {
+
+        if (!text) return "";
 
         return text
 
@@ -145,68 +141,79 @@ const Utils = {
 
     },
 
+    /*
+    --------------------------------------
+    Console log naplózás
+    --------------------------------------
+    */
+    log(...args) {
 
+        console.log(
+
+            "[DrugAssist]",
+
+            ...args
+
+        );
+
+    },
 
     /*
     --------------------------------------
-    Console log
-
-    Később kikapcsolható
+    PDF szöveg tisztítása (ékezetek, ékezet-szóköz hibák)
     --------------------------------------
     */
+    cleanPdfText(text) {
 
-    log(...args) {
+        if (!text) return "";
 
-    console.log(
+        return text
 
-        "[DrugAssist]",
+            .replace(/([A-Za-zÁÉÍÓÖŐÚÜŰáéíóöőúüű])\s([őűŐŰ])/g, "$1$2")
 
-        ...args
+            .replace(/\s+/g, " ")
 
-    );
+            .trim();
 
-},
+    },
 
-cleanPdfText(text) {
+    /*
+    --------------------------------------
+    Dátum objektum formázása
+    --------------------------------------
+    */
+    formatDateTime(date) {
 
-    return text
-        .replace(/([A-Za-zÁÉÍÓÖŐÚÜŰáéíóöőúüű])\s([őűŐŰ])/g, "$1$2")
-        .replace(/\s+/g, " ")
-        .trim();
+        if (!(date instanceof Date) || isNaN(date)) {
 
-},
+            date = new Date();
 
-formatDateTime(date) {
+        }
 
-    const p = n =>
+        const p = n => String(n).padStart(2, "0");
 
-        String(n).padStart(
-            2,
-            "0"
+        return (
+
+            date.getFullYear() +
+
+            "." +
+
+            p(date.getMonth() + 1) +
+
+            "." +
+
+            p(date.getDate()) +
+
+            " " +
+
+            p(date.getHours()) +
+
+            ":" +
+
+            p(date.getMinutes())
+
         );
 
-    return (
-
-        date.getFullYear() +
-
-        "." +
-
-        p(date.getMonth() + 1) +
-
-        "." +
-
-        p(date.getDate()) +
-
-        " " +
-
-        p(date.getHours()) +
-
-        ":" +
-
-        p(date.getMinutes())
-
-    );
-
-}
+    }
 
 };
