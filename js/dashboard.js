@@ -19,7 +19,6 @@ Verzió:
 document.addEventListener("DOMContentLoaded", async () => {
 
     // Ideiglenes tesztfelhasználó
-    // A login elkészülésekor ezt töröljük.
     if (Storage.saveUser) {
         await Storage.saveUser({
             id: "G03",
@@ -28,15 +27,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const today = Utils.getToday();
-    const workDate = Storage.loadWorkDate ? await Storage.loadWorkDate() : null;
-
-    if (workDate !== today) {
-        if (Storage.clearWards) {
-            await Storage.clearWards();
-        }
-        if (Storage.saveWorkDate) {
-            await Storage.saveWorkDate(today);
-        }
+    
+    // Munkadátum frissítése (törlés nélkül!)
+    if (Storage.saveWorkDate) {
+        await Storage.saveWorkDate(today);
     }
 
     const pdfInput = document.getElementById("pdfInput");
