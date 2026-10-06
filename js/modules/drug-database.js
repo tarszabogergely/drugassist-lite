@@ -278,7 +278,19 @@ const DrugDatabase = {
 
     async loadFromSupabase() {
 
-        if (typeof supabase === "undefined" || !supabase) return false;
+        // Ellenőrizzük, hogy a Supabase kliens valóban inicializálva van-e
+        const isSupabaseReady = typeof supabase !== "undefined" && 
+                                supabase && 
+                                typeof supabase.from === "function" &&
+                                typeof CONFIG !== "undefined" &&
+                                CONFIG.supabase?.url &&
+                                !CONFIG.supabase.url.includes("YOUR_SUPABASE");
+
+        if (!isSupabaseReady) {
+
+            return false;
+
+        }
 
         try {
 
@@ -288,9 +300,9 @@ const DrugDatabase = {
 
                 .select('*');
 
-            if (error || !data) {
+            if (error || !data || data.length === 0) {
 
-                console.error("Hiba a Supabase gyógyszertörzs lekérdezésekor:", error);
+                console.warn("Nem sikerült lekérni a törzset a Supabase-ből, váltás helyi adatokra.");
 
                 return false;
 
@@ -304,7 +316,7 @@ const DrugDatabase = {
 
         } catch (err) {
 
-            console.error("Supabase csatlakozási hiba a törzsnél:", err);
+            console.warn("Supabase csatlakozási hiba a törzsnél:", err);
 
             return false;
 
