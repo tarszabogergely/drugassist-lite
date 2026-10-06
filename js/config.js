@@ -107,7 +107,7 @@ const CONFIG = {
 
     pdf: {
 
-        worker: "pdf.worker.min.js"
+        worker: "js/pdf.worker.min.js"
 
     },
 
