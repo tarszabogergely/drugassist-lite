@@ -262,9 +262,13 @@ const DrugDatabase = {
 
             this.buildIndexes();
 
+            return true;
+
         } catch (error) {
 
             console.warn(`Hiba a törzs betöltésekor (${path}):`, error);
+
+            return false;
 
         }
 
@@ -370,16 +374,15 @@ const DrugDatabase = {
 
     async init() {
 
-        // Elsőként próbáljuk meg a Supabase-t, ha nincs, akkor a JSON-t
+        // Elsőként próbáljuk meg a Supabase-t
         const loadedFromDb = await this.loadFromSupabase();
 
+        // Ha a Supabase nem elérhető vagy nincs beállítva, betöltjük a helyi törzset
         if (!loadedFromDb) {
 
-            try {
+            const loaded = await this.loadJson("data/drug-database.json");
 
-                await this.loadJson("data/drug-database.json");
-
-            } catch (e) {
+            if (!loaded) {
 
                 await this.loadJson("drug-database.json");
 
