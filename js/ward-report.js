@@ -2,12 +2,13 @@
 =====================================
 Ward PDF report
 DrugAssist Lite
+Verzió: 2.0.0
 =====================================
 */
 
 const WardReport = {
 
-    generate(ward) {
+    async generate(ward) {
 
         const { jsPDF } = window.jspdf;
 
@@ -55,7 +56,7 @@ const WardReport = {
 
         y += 6;
 
-        const user = Storage.loadUser() || {};
+        const user = (Storage.loadUser ? await Storage.loadUser() : null) || {};
 
         pdf.text(
             "Készítette: " +
@@ -83,26 +84,26 @@ const WardReport = {
 
         (ward.patients || []).forEach(patient => {
 
-    const patientNote =
-        patient.closeNote ||
-        patient.note ||
-        "";
+            const patientNote =
+                patient.closeNote ||
+                patient.note ||
+                "";
 
-    const patientHeight =
-        26 +                                    // beteg fejléc
-        ((patient.medications || []).length * 7) +
-        (patientNote ? 14 : 0) +
-        8;
+            const patientHeight =
+                26 +                                    // beteg fejléc
+                ((patient.medications || []).length * 7) +
+                (patientNote ? 14 : 0) +
+                8;
 
-    if (y + patientHeight > 280) {
+            if (y + patientHeight > 280) {
 
-        pdf.addPage();
+                pdf.addPage();
 
-        y = 15;
+                y = 15;
 
-    }
+            }
 
-    pdf.setFontSize(13);
+            pdf.setFontSize(13);
 
             pdf.text(
                 patient.name || "",
@@ -165,8 +166,6 @@ const WardReport = {
                 y + 5
             );
 
-            
-
             y += 7;
 
             /*
@@ -177,7 +176,6 @@ const WardReport = {
 
             (patient.medications || []).forEach(med => {
 
-
                 if (y > 270) {
 
                     pdf.addPage();
@@ -187,57 +185,50 @@ const WardReport = {
                 }
 
                 const name =
-    med.name ||
-    med.drugName ||
-    med.medication ||
-    med.product ||
-    "";
+                    med.name ||
+                    med.drugName ||
+                    med.medication ||
+                    med.product ||
+                    "";
 
-const dose = Object.entries(
-    med.schedule || {}
-)
-.map(
-    ([time, value]) => `${time}: ${value}`
-)
-.join(", ");
+                const dose = Object.entries(
+                    med.schedule || {}
+                )
+                    .map(
+                        ([time, value]) => `${time}: ${value}`
+                    )
+                    .join(", ");
 
-const note =
-    med.note ||
-    med.comment ||
-    med.remark ||
-    "";
+                const nameLines = pdf.splitTextToSize(
+                    String(name),
+                    135
+                );
 
-const nameLines = pdf.splitTextToSize(
-    String(name),
-    135
-);
+                const rowHeight = Math.max(
+                    nameLines.length * 5 + 2,
+                    7
+                );
 
-const rowHeight = Math.max(
-    nameLines.length * 5 + 2,
-    7
-);
+                pdf.rect(
+                    15,
+                    y,
+                    180,
+                    rowHeight
+                );
 
-pdf.rect(
-    15,
-    y,
-    180,
-    rowHeight
-);
+                pdf.text(
+                    nameLines,
+                    18,
+                    y + 5
+                );
 
-pdf.text(
-    nameLines,
-    18,
-    y + 5
-);
+                pdf.text(
+                    String(dose),
+                    110,
+                    y + 5
+                );
 
-pdf.text(
-    String(dose),
-    110,
-    y + 5
-);
-
-
-y += rowHeight;
+                y += rowHeight;
 
             });
 
@@ -247,7 +238,6 @@ y += rowHeight;
             =====================================
             */
 
-            
             if (patientNote) {
 
                 y += 6;
@@ -345,12 +335,11 @@ y += rowHeight;
             y
         );
 
-        const today =
-    Utils.getToday().replaceAll(".", "-");
+        const today = Utils.getToday().replaceAll(".", "-");
 
-pdf.save(
-    `Gyogyszereles_${ward.wardCode}_${today}.pdf`
-);
+        pdf.save(
+            `Gyogyszereles_${ward.wardCode}_${today}.pdf`
+        );
 
     }
 
