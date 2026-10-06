@@ -3,69 +3,14 @@
 DrugAssist Lite
 Modul: Gyógyszerészi ellenőrzés
 Fájl: review.js
-Verzió: 0.1.0
+Verzió: 2.0.0
 
 Leírás:
-A gyógyszerészi ellenőrzési oldal működését vezérlő modul.
-
-Feladatai:
-- A kiválasztott beteg betöltése
-- Betegadatok megjelenítése
-- Gyógyszerlista felépítése
-- Morfológiai leírások megjelenítése
-- Adagolási időpontok megjelenítése
-- Gyógyszerenkénti ellenőrző pipa kezelése
-- Az ellenőrzési állapot nyilvántartása
-- Az "Ellenőrzés lezárása" gomb engedélyezése
-- A gyógyszerelés lezárása
-
-Felhasznált modulok:
-- config.js
-- storage.js
-- utils.js
-- morphology.js
-
-Használt objektumok:
-- patient
-- patient.medications
-- medication.schedule
-- medication.checked
-
-Működési folyamat:
-
-review-ward.html
-        │
-        ▼
-Beteg kiválasztása
-        │
-        ▼
-Storage.loadPatient()
-        │
-        ▼
-Betegadatok megjelenítése
-        │
-        ▼
-Gyógyszerlista felépítése
-        │
-        ▼
-Morfológiai leírások betöltése
-        │
-        ▼
-Gyógyszerenkénti ellenőrzés
-        │
-        ▼
-Minden gyógyszer ellenőrizve?
-        │
-        ├── Nem → Lezárás gomb tiltva
-        │
-        └── Igen
-              │
-              ▼
-Gyógyszerelés lezárása
+A gyógyszerészi ellenőrzési oldal működését vezérlő modul
+(Supabase adatbázis integrációval).
 
 Fejlesztő:
 Tarszabó Gergely + ChatGPT
-
 ==========================================================
 */
 
@@ -74,71 +19,33 @@ Tarszabó Gergely + ChatGPT
 let patient = null;
 let readOnly = false;
 
-const reviewTable =
-    document.getElementById("medicationTable");
+const reviewTable = document.getElementById("medicationTable");
+const reviewButton = document.getElementById("reviewButton");
+const patientName = document.getElementById("patientName");
+const patientId = document.getElementById("patientId");
+const patientWard = document.getElementById("patientWard");
+const patientBed = document.getElementById("patientBed");
+const productionId = document.getElementById("productionId");
+const preparedBy = document.getElementById("preparedBy");
+const reviewTitle = document.getElementById("reviewTitle");
 
-const reviewButton =
-    document.getElementById("reviewButton");
+const barcodeModal = document.getElementById("barcodeModal");
+const barcodeInput = document.getElementById("barcodeInput");
+const barcodeError = document.getElementById("barcodeError");
+const cancelBarcode = document.getElementById("cancelBarcode");
+const confirmBarcode = document.getElementById("confirmBarcode");
 
-const patientName =
-    document.getElementById("patientName");
+document.addEventListener("DOMContentLoaded", init);
 
-const patientId =
-    document.getElementById("patientId");
+async function init() {
 
-const patientWard =
-    document.getElementById("patientWard");
+    if (typeof Morphology !== "undefined" && Morphology.load) {
+        await Morphology.load();
+    }
 
-const patientBed =
-    document.getElementById("patientBed");
+    await loadPatient();
 
-const productionId =
-    document.getElementById("productionId");
-
-const preparedBy =
-    document.getElementById("preparedBy");
-
-const reviewTitle =
-    document.getElementById("reviewTitle");
-
-const barcodeModal =
-    document.getElementById(
-        "barcodeModal"
-    );
-
-const barcodeInput =
-    document.getElementById(
-        "barcodeInput"
-    );
-
-const barcodeError =
-    document.getElementById(
-        "barcodeError"
-    );
-
-const cancelBarcode =
-    document.getElementById(
-        "cancelBarcode"
-    );
-
-const confirmBarcode =
-    document.getElementById(
-        "confirmBarcode"
-    );
-
-
-document.addEventListener(
-    "DOMContentLoaded",
-    init
-);
-
-async function init(){
-
-    await Morphology.load();
-
-    loadPatient();
-
-    if(!patient){
+    if (!patient) {
 
         alert("Nincs kiválasztott beteg.");
 
@@ -148,37 +55,33 @@ async function init(){
 
     }
 
-    readOnly =
-        patient.status ===
-        CONFIG.status.REVIEWED;
+    readOnly = patient.status === CONFIG.status.REVIEWED;
 
     renderPatient();
 
-    renderMedicationTable();
+    await renderMedicationTable();
 
     updateReviewButton();
 
-    reviewButton.onclick =
-        finishReview;
+    if (reviewButton) {
+        reviewButton.onclick = finishReview;
+    }
 
-    cancelBarcode.onclick = ()=>{
+    if (cancelBarcode) {
+        cancelBarcode.onclick = () => {
+            barcodeModal.classList.add("hidden");
+        };
+    }
 
-        barcodeModal.classList.add(
-            "hidden"
-        );
+    if (confirmBarcode) {
+        confirmBarcode.onclick = checkBarcode;
+    }
 
-    };
+    if (barcodeInput) {
 
-    confirmBarcode.onclick =
-        checkBarcode;
+        barcodeInput.addEventListener("keydown", async event => {
 
-    barcodeInput.addEventListener(
-
-        "keydown",
-
-        event=>{
-
-            if(event.key !== "Enter"){
+            if (event.key !== "Enter") {
 
                 return;
 
@@ -186,210 +89,163 @@ async function init(){
 
             event.preventDefault();
 
-            checkBarcode();
+            await checkBarcode();
 
-        }
+        });
 
-    );
-
-}
-
-
-function loadPatient(){
-
-    patient =
-        Storage.loadPatient();
+    }
 
 }
 
-function renderPatient(){
+async function loadPatient() {
 
-    patientName.textContent =
-        patient.name;
-
-    patientId.textContent =
-        patient.patientId || "-";
-
-    patientWard.textContent =
-        patient.wardName || "-";
-
-    patientBed.textContent =
-        patient.bed;
-
-    productionId.textContent =
-
-        patient.preparation
-
-            ? patient.preparation.id
-
-            : "-";
-
-    preparedBy.textContent =
-
-        patient.preparation?.preparedBy ||
-
-        "-";
-
-    reviewTitle.textContent =
-        `💊 Gyógyszerészi ellenőrzés (${patient.medications.length} gyógyszer)`;
+    patient = await Storage.loadPatient();
 
 }
 
-function renderMedicationTable(){
+function renderPatient() {
+
+    patientName.textContent = patient.name;
+
+    patientId.textContent = patient.patientId || "-";
+
+    patientWard.textContent = patient.wardName || "-";
+
+    patientBed.textContent = patient.bed || "-";
+
+    productionId.textContent = patient.preparation
+        ? patient.preparation.id
+        : "-";
+
+    preparedBy.textContent = patient.preparation?.preparedBy || "-";
+
+    const medCount = (patient.medications || []).length;
+
+    reviewTitle.textContent = `💊 Gyógyszerészi ellenőrzés (${medCount} gyógyszer)`;
+
+}
+
+async function renderMedicationTable() {
 
     reviewTable.innerHTML = "";
 
-    patient.medications.forEach((medication,index)=>{
+    const medications = patient.medications || [];
 
-        if(medication.checked === undefined){
+    for (let index = 0; index < medications.length; index++) {
 
-    medication.checked = false;
+        const medication = medications[index];
 
-    Storage.savePatient(patient);
+        if (medication.checked === undefined) {
 
-}
+            medication.checked = false;
 
-        const row =
-            document.createElement("tr");
+            await Storage.savePatient(patient);
+
+        }
+
+        const row = document.createElement("tr");
 
         row.dataset.index = index;
 
-        if(medication.checked){
+        if (medication.checked) {
 
             row.classList.add("reviewed");
 
         }
 
-        const schedule =
-            medication.schedule || {};
+        const schedule = medication.schedule || {};
 
-        const description =
-            Morphology.getDescription(
-                medication.medication
-            );
+        const description = (typeof Morphology !== "undefined" && Morphology.getDescription)
+            ? Morphology.getDescription(medication.medication)
+            : "";
 
         row.innerHTML = `
-
 <td class="drug-cell">
-
     <div class="drug-name">
-
         ${medication.medication}
-
     </div>
-
     <div class="drug-morphology">
-
         ${description}
-
     </div>
-
 </td>
-
 <td class="dose">${schedule["Éjjel"] || ""}</td>
-
 <td class="dose">${schedule["Hajnal"] || ""}</td>
-
 <td class="dose">${schedule["Reggel"] || ""}</td>
-
 <td class="dose">${schedule["Dél"] || ""}</td>
-
 <td class="dose">${schedule["Délután"] || ""}</td>
-
 <td class="dose">${schedule["Este"] || ""}</td>
-
 <td class="check-cell">
-
     <div class="check-button ${medication.checked ? "checked" : ""}">
-
         ${medication.checked ? "✔" : "✓"}
-
     </div>
-
 </td>
-
 `;
 
-        const checkButton =
-    row.querySelector(".check-button");
+        const checkButton = row.querySelector(".check-button");
 
-if(readOnly){
+        if (readOnly) {
 
-    checkButton.classList.add(
-        "disabled"
-    );
+            checkButton.classList.add("disabled");
 
-}
+        }
 
-checkButton.onclick = ()=>{
+        checkButton.onclick = async () => {
 
-    if(readOnly){
+            if (readOnly) {
 
-        return;
+                return;
 
-    }
+            }
 
-            medication.checked =
-    !medication.checked;
+            medication.checked = !medication.checked;
 
-Storage.savePatient(
-    patient
-);
+            await Storage.savePatient(patient);
 
-row.classList.toggle(
-    "reviewed",
-    medication.checked
-);
+            row.classList.toggle("reviewed", medication.checked);
 
-checkButton.classList.toggle(
-    "checked",
-    medication.checked
-);
+            checkButton.classList.toggle("checked", medication.checked);
 
-checkButton.textContent =
-    medication.checked
-        ? "✔"
-        : "✓";
+            checkButton.textContent = medication.checked ? "✔" : "✓";
 
-updateReviewButton();
+            updateReviewButton();
 
         };
 
         reviewTable.appendChild(row);
 
-    });
+    }
 
 }
 
-function updateReviewButton(){
+function updateReviewButton() {
 
-    if(readOnly){
+    if (!reviewButton) return;
+
+    if (readOnly) {
 
         reviewButton.disabled = true;
 
-        reviewButton.textContent =
-            "✔ Ellenőrzés befejezve";
+        reviewButton.textContent = "✔ Ellenőrzés befejezve";
 
         return;
 
     }
 
-    const allChecked =
-        patient.medications.every(
-            medication => medication.checked
-        );
+    const medications = patient.medications || [];
 
-    reviewButton.disabled =
-        !allChecked;
+    const allChecked = medications.length > 0 && medications.every(
+        medication => medication.checked
+    );
 
-    reviewButton.textContent =
-        "Ellenőrzés lezárása";
+    reviewButton.disabled = !allChecked;
+
+    reviewButton.textContent = "Ellenőrzés lezárása";
 
 }
 
-function finishReview(){
+function finishReview() {
 
-    if(readOnly){
+    if (readOnly) {
 
         return;
 
@@ -399,32 +255,27 @@ function finishReview(){
 
 }
 
-function openBarcodeModal(){
+function openBarcodeModal() {
 
-    barcodeError.textContent = "";
+    if (barcodeError) barcodeError.textContent = "";
 
-    barcodeInput.value = "";
+    if (barcodeInput) barcodeInput.value = "";
 
-    barcodeModal.classList.remove(
-        "hidden"
-    );
+    if (barcodeModal) barcodeModal.classList.remove("hidden");
 
-    barcodeInput.focus();
+    if (barcodeInput) barcodeInput.focus();
 
 }
 
-function checkBarcode(){
+async function checkBarcode() {
 
-    const barcode =
-        barcodeInput.value.trim();
+    const barcode = barcodeInput.value.trim();
 
-    if(
-        barcode !==
-        patient.preparation.id
-    ){
+    const expectedId = patient.preparation ? patient.preparation.id : null;
 
-        barcodeError.textContent =
-            "❌ Hibás készítési azonosító!";
+    if (barcode !== expectedId) {
+
+        barcodeError.textContent = "❌ Hibás készítési azonosító!";
 
         barcodeInput.select();
 
@@ -432,22 +283,16 @@ function checkBarcode(){
 
     }
 
-    patient.status =
-        CONFIG.status.REVIEWED;
+    patient.status = CONFIG.status.REVIEWED;
 
-    Storage.savePatient(
-        patient
-    );
+    await Storage.savePatient(patient);
 
-    barcodeModal.classList.add(
-        "hidden"
-    );
+    if (barcodeModal) {
+        barcodeModal.classList.add("hidden");
+    }
 
-    alert(
-        "A gyógyszerelés sikeresen lezárva."
-    );
+    alert("A gyógyszerelés sikeresen lezárva.");
 
-    location.href =
-        "completed.html";
+    location.href = "completed.html";
 
 }
