@@ -6,13 +6,14 @@ Fájl:
 ward.js
 
 Feladata:
-Az aktuális osztály betegeinek megjelenítése.
+Az aktuális osztály betegeinek megjelenítése
+(Supabase adatbázis integrációval).
 
 Fejlesztő:
 Tarszabó Gergely + ChatGPT
 
 Verzió:
-1.0.0
+1.1.0
 =========================================
 */
 
@@ -21,36 +22,32 @@ document.addEventListener(
     loadWard
 );
 
-function loadWard() {
+async function loadWard() {
 
-        const wardCode =
-        Storage.loadCurrentWard();
+    const wardCode = Storage.loadCurrentWard();
 
     if (!wardCode) {
 
         alert("Nincs kiválasztott osztály.");
 
-        window.location.href =
-            "dashboard.html";
+        window.location.href = "dashboard.html";
 
         return;
 
     }
 
-    const wards =
-        Storage.loadWards();
+    // Osztályok betöltése aszinkron módon a Supabase-ből
+    const wards = await Storage.loadWards();
 
-    const ward =
-        wards.find(
-            w => w.wardCode === wardCode
-        );
+    const ward = wards.find(
+        w => w.wardCode === wardCode
+    );
 
     if (!ward) {
 
         alert("Az osztály nem található.");
 
-        window.location.href =
-            "dashboard.html";
+        window.location.href = "dashboard.html";
 
         return;
 
@@ -64,11 +61,9 @@ function renderWard(ward) {
 
     document.getElementById(
         "wardTitle"
-    ).textContent =
-        ward.wardName;
+    ).textContent = ward.wardName;
 
-    const activePatients =
-    ward.patients.filter(
+    const activePatients = ward.patients.filter(
         patient =>
             patient.status !== CONFIG.status.CHECKED &&
             patient.status !== CONFIG.status.REVIEWED
@@ -77,22 +72,17 @@ function renderWard(ward) {
     document.getElementById(
         "patientCount"
     ).textContent =
-        activePatients.length +
-        " beteg vár gyógyszerelésre";
+        activePatients.length + " beteg vár gyógyszerelésre";
 
-    const container =
-        document.getElementById(
-            "patientContainer"
-        );
+    const container = document.getElementById(
+        "patientContainer"
+    );
 
     container.innerHTML = "";
 
     activePatients.forEach(patient => {
 
-        const card =
-            Render.createPatientCard(
-                patient
-            );
+        const card = Render.createPatientCard(patient);
 
         container.appendChild(card);
 
@@ -110,10 +100,9 @@ Osztályos átadó PDF
 
 function initWardPdf(ward) {
 
-    const button =
-        document.getElementById(
-            "wardPdfButton"
-        );
+    const button = document.getElementById(
+        "wardPdfButton"
+    );
 
     if (!button) {
 
