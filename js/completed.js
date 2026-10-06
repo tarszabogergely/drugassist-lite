@@ -7,13 +7,13 @@ completed.js
 
 Feladata:
 Gyógyszerészileg ellenőrzött
-betegek megjelenítése.
+betegek megjelenítése (Supabase adatbázissal).
 
 Fejlesztő:
 Tarszabó Gergely + ChatGPT
 
 Verzió:
-1.0.0
+2.0.0
 =========================================
 */
 
@@ -22,31 +22,30 @@ document.addEventListener(
     init
 );
 
-function init(){
+async function init() {
 
-    renderPatients();
+    await renderPatients();
 
 }
 
-function renderPatients(){
+async function renderPatients() {
 
-    const container =
-        document.getElementById(
-            "patientList"
+    const container = document.getElementById(
+        "patientList"
+    );
+
+    // Osztályok aszinkron betöltése Supabase-ből
+    const wards = await Storage.loadWards();
+
+    const patients = wards
+        .flatMap(ward => ward.patients || [])
+        .filter(patient =>
+            patient.status === CONFIG.status.REVIEWED
         );
-
-    const patients =
-        Storage
-            .loadWards()
-            .flatMap(ward => ward.patients)
-            .filter(patient =>
-                patient.status ===
-                CONFIG.status.REVIEWED
-            );
 
     container.innerHTML = "";
 
-    if(!patients.length){
+    if (!patients.length) {
 
         container.innerHTML = `
 <div class="empty">
@@ -57,13 +56,11 @@ Nincs ellenőrzött beteg.
 
     }
 
-    patients.forEach(patient=>{
+    patients.forEach(patient => {
 
-        const card =
-            document.createElement("div");
+        const card = document.createElement("div");
 
-        card.className =
-            "patient-card";
+        card.className = "patient-card";
 
         card.innerHTML = `
 <div>
@@ -87,14 +84,13 @@ Nincs ellenőrzött beteg.
 </div>
 `;
 
-        card.onclick = ()=>{
+        card.onclick = async () => {
 
-            Storage.saveCurrentPatient(
+            await Storage.saveCurrentPatient(
                 patient.patientId
             );
 
-            location.href =
-                "review.html";
+            location.href = "review.html";
 
         };
 
