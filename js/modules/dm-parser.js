@@ -6,14 +6,14 @@ Fájl:
 dm-parser.js
 
 Feladata:
-Gyógyszer DataMatrix
-feldolgozása.
+Gyógyszer DataMatrix vonalkódok
+feldolgozása (GTIN, lejárat, sarzs).
 
 Fejlesztő:
 Tarszabó Gergely + ChatGPT
 
 Verzió:
-4.0.0
+2.0.0
 =========================================
 */
 
@@ -21,99 +21,93 @@ const DmParser = {
 
     /*
     =====================================
-    DM feldolgozása
+    DM vonalkód feldolgozása
     =====================================
     */
 
     parse(code) {
 
-    const result = {
+        const result = {
 
-        gtin: "",
+            gtin: "",
 
-        expiry: "",
+            expiry: "",
 
-        lot: ""
+            lot: ""
 
-    };
+        };
 
-    if (!code) {
+        if (!code) {
 
-        return result;
+            return result;
 
-    }
+        }
 
-    /*
-    =====================================
-    GTIN
-    =====================================
-    */
+        /*
+        =====================================
+        GTIN
+        =====================================
+        */
 
-    if (
+        if (
 
-        code.startsWith("01") &&
+            code.startsWith("01") &&
 
-        code.length >= 16
+            code.length >= 16
 
-    ) {
+        ) {
 
-        result.gtin =
+            result.gtin =
 
-            this.normalizeGtin(
+                this.normalizeGtin(
 
-                code.substring(2, 16)
+                    code.substring(2, 16)
 
-            );
+                );
 
-    }
+        }
 
-    /*
-    =====================================
-    Lejárat
-    =====================================
-    */
+        /*
+        =====================================
+        Lejárat
+        =====================================
+        */
 
-    const expiryPos =
+        const expiryPos = code.indexOf("17");
 
-        code.indexOf("17");
+        if (
 
-    if (
+            expiryPos !== -1 &&
 
-        expiryPos !== -1 &&
+            code.length >= expiryPos + 8
 
-        code.length >= expiryPos + 8
+        ) {
 
-    ) {
+            result.expiry =
 
-        result.expiry =
+                this.formatExpiry(
 
-            this.formatExpiry(
+                    code.substring(
 
-                code.substring(
+                        expiryPos + 2,
 
-                    expiryPos + 2,
+                        expiryPos + 8
 
-                    expiryPos + 8
+                    )
 
-                )
+                );
 
-            );
+        }
 
-    }
+        /*
+        =====================================
+        LOT (Sarzs)
+        =====================================
+        */
 
-    /*
-    =====================================
-    LOT
-    =====================================
-    */
+        if (expiryPos !== -1) {
 
-    if (expiryPos !== -1) {
-
-        // Van-e 10 a lejárat után?
-
-        const lotAfter =
-
-            code.indexOf(
+            const lotAfter = code.indexOf(
 
                 "10",
 
@@ -121,65 +115,39 @@ const DmParser = {
 
             );
 
-        if (lotAfter !== -1) {
+            if (lotAfter !== -1) {
 
-            result.lot =
+                result.lot = code.substring(lotAfter + 2);
 
-                code.substring(
+            } else {
 
-                    lotAfter + 2
+                const before = code.substring(16, expiryPos);
 
-                );
+                const relPos = before.lastIndexOf("10");
 
-        }
+                if (relPos !== -1) {
 
-        else {
+                    result.lot = before.substring(relPos + 2);
 
-            // A lejárat előtti UTOLSÓ 10
-
-            const before =
-
-                code.substring(
-
-                    16,
-
-                    expiryPos
-
-                );
-
-            const relPos =
-
-                before.lastIndexOf("10");
-
-            if (relPos !== -1) {
-
-                result.lot =
-
-                    before.substring(
-
-                        relPos + 2
-
-                    );
+                }
 
             }
 
         }
 
-    }
-
-    return result;
+        return result;
 
     },
 
     /*
     =====================================
-    GTIN normalizálása
-
-    GTIN14 -> EAN13
+    GTIN normalizálása (GTIN14 -> EAN13)
     =====================================
     */
 
     normalizeGtin(gtin) {
+
+        if (!gtin) return "";
 
         if (
 
@@ -199,17 +167,13 @@ const DmParser = {
 
     /*
     =====================================
-    Lejárat formázása
+    Lejárat formázása (YYMMDD -> YYYY-MM-DD)
     =====================================
     */
 
     formatExpiry(value) {
 
-        if (
-
-            value.length !== 6
-
-        ) {
+        if (!value || value.length !== 6) {
 
             return "";
 
@@ -219,15 +183,15 @@ const DmParser = {
 
             "20" +
 
-            value.substring(0,2) +
+            value.substring(0, 2) +
 
             "-" +
 
-            value.substring(2,4) +
+            value.substring(2, 4) +
 
             "-" +
 
-            value.substring(4,6)
+            value.substring(4, 6)
 
         );
 
