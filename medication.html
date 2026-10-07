@@ -18,7 +18,7 @@ body{
 
 header{
     background:white;
-    padding:18px 32px;
+    padding:14px 32px;
     border-bottom:1px solid #e0e0e0;
 
     display:flex;
@@ -32,15 +32,112 @@ header h1{
     font-weight:600;
 }
 
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
 .user-info{
-    color:#666;
+    color:#2c3e50;
     font-size:14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.clock-badge {
+    background: #eef4fb;
+    padding: 6px 12px;
+    border-radius: 8px;
+    color: #2980b9;
+    font-weight: 600;
+}
+
+.logout-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.logout-btn:hover {
+    background: #c0392b;
 }
 
 /* CONTAINER */
 
 .container{
     padding:32px;
+}
+
+/* DATE BAR / DÁTUMLÉPTETŐ */
+
+.date-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    padding: 16px 24px;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+    margin-bottom: 24px;
+}
+
+.date-picker-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.date-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.date-btn:hover {
+    background: #2980b9;
+}
+
+.current-date-display {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
+    min-width: 140px;
+    text-align: center;
+}
+
+.today-btn {
+    background: #ecf0f1;
+    color: #34495e;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.today-btn:hover {
+    background: #bdc3c7;
 }
 
 /* IMPORT */
@@ -219,13 +316,27 @@ input[type=file]{
 
     <h1>DrugAssist</h1>
 
-    <div class="user-info">
-        Gergő | 2026.06.24
+    <div class="header-right">
+        <div class="user-info">
+            <span id="userNameDisplay">Bejelentkezett felhasználó</span>
+            <span id="clockDisplay" class="clock-badge">----.--.-- --:--</span>
+        </div>
+        <button class="logout-btn" onclick="Auth.logout()">Kijelentkezés</button>
     </div>
 
 </header>
 
 <div class="container">
+
+    <!-- DÁTUMLÉPTETŐ PANEL -->
+    <div class="date-bar">
+        <div class="date-picker-group">
+            <button class="date-btn" id="prevDayBtn">&lt;</button>
+            <span class="current-date-display" id="selectedDateDisplay">----.--.--</span>
+            <button class="date-btn" id="nextDayBtn">&gt;</button>
+        </div>
+        <button class="today-btn" id="todayBtn">Mai nap</button>
+    </div>
 
     <div class="import-card">
 
@@ -252,13 +363,13 @@ input[type=file]{
     </div>
 
     <div
-    id="wardContainer"
-    class="ward-grid"
->
+        id="wardContainer"
+        class="ward-grid"
+    >
 
-    <div class="empty-state">
-
-        Még nincs betöltött osztálylista.
+        <div class="empty-state">
+            Még nincs betöltött osztálylista.
+        </div>
 
     </div>
 
@@ -267,7 +378,7 @@ input[type=file]{
 <!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- Konfiguráció és Tároló -->
+<!-- Konfiguráció, Hitelesítés és Tároló -->
 <script src="js/config.js"></script>
 
 <script>
@@ -276,12 +387,13 @@ input[type=file]{
   }
 </script>
 
+<script src="js/auth.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/render.js"></script>
 <script src="js/pdf.min.js"></script>
 
-<!-- Parserek (a js/ vagy js/modules/ mappából) -->
+<!-- Parserek -->
 <script src="js/modules/dm-parser.js"></script>
 <script src="js/modules/pdf-layout-parser.js"></script>
 <script src="js/modules/patient-pdf-parser.js"></script>
@@ -291,6 +403,69 @@ input[type=file]{
 <script src="js/departments.js"></script>
 <script src="js/pdf-import.js"></script>
 <script src="js/dashboard.js"></script>
+
+<!-- Helyi napléptető és óra logika -->
+<script>
+let currentDate = new Date();
+
+function formatDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}.${m}.${d}`;
+}
+
+function updateClock() {
+    const now = new Date();
+    const dateStr = formatDate(now);
+    const hours = String(now.getHours()).padStart(2, '0');
+    const mins = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById("clockDisplay").innerText = `${dateStr} ${hours}:${mins}`;
+}
+
+async function loadDataForSelectedDate() {
+    const dateStr = formatDate(currentDate);
+    document.getElementById("selectedDateDisplay").innerText = dateStr;
     
+    if (typeof Storage !== "undefined" && Storage.loadWards) {
+        const wards = await Storage.loadWards(dateStr);
+        if (typeof Render !== "undefined" && Render.renderWardCards) {
+            Render.renderWardCards(wards);
+        }
+    }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    // 1. Munkamenet védelmi ellenőrzés
+    const currentUser = Auth.requireAuth();
+    if (currentUser) {
+        document.getElementById("userNameDisplay").innerText = currentUser.name;
+    }
+
+    // 2. Óra indítása
+    updateClock();
+    setInterval(updateClock, 10000);
+
+    // 3. Dátumléptető események
+    document.getElementById("prevDayBtn").addEventListener("click", () => {
+        currentDate.setDate(currentDate.getDate() - 1);
+        loadDataForSelectedDate();
+    });
+
+    document.getElementById("nextDayBtn").addEventListener("click", () => {
+        currentDate.setDate(currentDate.getDate() + 1);
+        loadDataForSelectedDate();
+    });
+
+    document.getElementById("todayBtn").addEventListener("click", () => {
+        currentDate = new Date();
+        loadDataForSelectedDate();
+    });
+
+    // Kezdő dátum (mai nap) betöltése
+    await loadDataForSelectedDate();
+});
+</script>
+
 </body>
 </html>
