@@ -12,18 +12,8 @@ const Storage = {
     // 1. DASHBOARD & FEJLESZTŐI INTERFÉSZ (loadWards, mergeWard, stb.)
     // =========================================================
 
-    // Osztályok betöltése a created_at dátum alapján
+    // Osztályok betöltése a Supabase-ből adott napra
     async loadWards(targetDate = null) {
-        // Ha nem adtunk meg dátumot, az a mai nap
-        if (!targetDate) {
-            targetDate = Utils.getToday(); // "YYYY.MM.DD" vagy "YYYY-MM-DD"
-        }
-
-        // Dátum formátum egységesítése ISO formátumra (YYYY-MM-DD)
-        const formattedDate = targetDate.replace(/\./g, '-');
-        const startOfDay = `${formattedDate}T00:00:00.000Z`;
-        const endOfDay = `${formattedDate}T23:59:59.999Z`;
-
         const isSupabaseReady = typeof supabase !== "undefined" && 
                                 supabase && 
                                 typeof supabase.from === "function" &&
@@ -33,16 +23,26 @@ const Storage = {
 
         if (isSupabaseReady) {
             try {
-                const { data, error } = await supabase
-                    .from('wards')
-                    .select('*')
-                    .gte('created_at', startOfDay)
-                    .lte('created_at', endOfDay);
+                let query = supabase.from('wards').select('*');
+
+                if (targetDate) {
+                    // YYYY-MM-DD formátum feldolgozása
+                    const cleanDate = targetDate.replace(/\./g, '-');
+                    const startOfDay = new Date(`${cleanDate}T00:00:00`).toISOString();
+                    const endOfDay = new Date(`${cleanDate}T23:59:59`).toISOString();
+
+                    query = query.gte('created_at', startOfDay).lte('created_at', endOfDay);
+                }
+
+                const { data, error } = await query;
 
                 if (error) {
                     console.error("Hiba a Supabase osztályok lekérésekor:", error);
+                    // Ha a dátum szerinti szűrés hibát ad, próbáljuk meg szűrés nélkül
+                    const fallback = await supabase.from('wards').select('*');
+                    return fallback.data || [];
                 } else if (data) {
-                    Utils.log(`Osztályok betöltve (${formattedDate}):`, data.length, "db osztály");
+                    Utils.log(`Osztályok betöltve (${targetDate || 'összes'}):`, data.length, "db osztály");
                     return data;
                 }
             } catch (err) {
@@ -76,25 +76,23 @@ const Storage = {
 
                 if (error) {
                     console.error("Hiba az osztály Supabase mentésekor:", error);
+                } else {
+                    Utils.log("Osztály elmentve a Supabase-be:", ward.wardName);
                 }
             } catch (err) {
                 console.error("Supabase mentési hiba:", err);
             }
         }
-    },
 
-        // Helyi mentés frissítése (LocalStorage)
-        const wards = await this.loadWards();
-        const existingIndex = wards.findIndex(w => w.wardCode === wardData.wardCode);
-
-        if (existingIndex >= 0) {
-            wards[existingIndex] = wardData;
+        // Helyi mentés frissítése is
+        let wards = JSON.parse(localStorage.getItem(CONFIG.storage.WARDS) || "[]");
+        const index = wards.findIndex(w => w.wardCode === ward.wardCode);
+        if (index >= 0) {
+            wards[index] = ward;
         } else {
-            wards.push(wardData);
+            wards.push(ward);
         }
-
         localStorage.setItem(CONFIG.storage.WARDS, JSON.stringify(wards));
-        return true;
     },
 
     // Osztályok törlése (új munkanap indításakor)
