@@ -408,27 +408,36 @@ input[type=file]{
 <script>
 let currentDate = new Date();
 
-function formatDate(date) {
+function formatDateForDisplay(date) {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
     return `${y}.${m}.${d}`;
 }
 
+function formatDateForQuery(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
 function updateClock() {
     const now = new Date();
-    const dateStr = formatDate(now);
+    const dateStr = formatDateForDisplay(now);
     const hours = String(now.getHours()).padStart(2, '0');
     const mins = String(now.getMinutes()).padStart(2, '0');
     document.getElementById("clockDisplay").innerText = `${dateStr} ${hours}:${mins}`;
 }
 
 async function loadDataForSelectedDate() {
-    const dateStr = formatDate(currentDate);
-    document.getElementById("selectedDateDisplay").innerText = dateStr;
+    const displayStr = formatDateForDisplay(currentDate);
+    const queryStr = formatDateForQuery(currentDate);
+
+    document.getElementById("selectedDateDisplay").innerText = displayStr;
     
     if (typeof Storage !== "undefined" && Storage.loadWards) {
-        const wards = await Storage.loadWards(dateStr);
+        const wards = await Storage.loadWards(queryStr);
         if (typeof Render !== "undefined" && Render.renderWardCards) {
             Render.renderWardCards(wards);
         }
