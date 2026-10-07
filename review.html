@@ -3,7 +3,7 @@
 DrugAssist Lite
 Modul: Gyógyszerészi ellenőrzés
 Fájl: review.html
-Verzió: 0.1.0
+Verzió: 6.1.0
 
 Leírás:
 A beteg gyógyszerelésének gyógyszerészi ellenőrzési felülete.
@@ -18,21 +18,15 @@ Fő funkciók:
   a gyógyszerelés lezárása
 
 Kapcsolódó fájlok:
+- auth.js
 - review.js
 - morphology.js
 - storage.js
 - config.js
 - utils.js
 
-Kapcsolódó oldalak:
-dashboard.html
-    ↓
-review-ward.html
-    ↓
-review.html
-
 Fejlesztő:
-Tarszabó Gergely + ChatGPT
+Tarszabó Gergely + ChatGPT + Gemini
 
 ==========================================================
 -->
@@ -74,7 +68,7 @@ header{
 
     background:white;
 
-    padding:18px 32px;
+    padding:14px 32px;
 
     border-bottom:1px solid #e0e0e0;
 
@@ -96,12 +90,50 @@ header h1{
 
 }
 
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
 .user-info{
+
+    color:#2c3e50;
 
     font-size:14px;
 
-    opacity:.9;
+    font-weight: 500;
 
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+}
+
+.clock-badge {
+    background: #eef4fb;
+    padding: 6px 12px;
+    border-radius: 8px;
+    color: #2980b9;
+    font-weight: 600;
+}
+
+.logout-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.logout-btn:hover {
+    background: #c0392b;
 }
 
 .container{
@@ -111,28 +143,6 @@ header h1{
     margin:auto;
 
     padding:32px;
-
-}
-
-.back{
-
-    margin-bottom:20px;
-
-}
-
-.back a{
-
-    color:#1565c0;
-
-    text-decoration:none;
-
-    font-weight:600;
-
-}
-
-.back a:hover{
-
-    text-decoration:underline;
 
 }
 
@@ -595,23 +605,17 @@ DrugAssist
 
 </h1>
 
-<div class="user-info" id="userInfo">
-
+<div class="header-right">
+    <div class="user-info">
+        <span id="userNameDisplay">Bejelentkezett felhasználó</span>
+        <span id="clockDisplay" class="clock-badge">----.--.-- --:--</span>
+    </div>
+    <button class="logout-btn" onclick="Auth.logout()">Kijelentkezés</button>
 </div>
 
 </header>
 
 <div class="container">
-
-<div class="back">
-
-<a href="completed.html">
-
-← Vissza az elkészültekhez
-
-</a>
-
-</div>
 
 <section class="card">
 
@@ -785,10 +789,48 @@ Készítési azonosító modal
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/config.js"></script>
+
+<script>
+  if (typeof supabase !== 'undefined' && supabase.createClient && CONFIG.supabase.url && !CONFIG.supabase.url.includes("YOUR_SUPABASE")) {
+    window.supabase = supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
+  }
+</script>
+
+<script src="js/auth.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/morphology.js"></script>
 <script src="js/review.js"></script>
+
+<!-- Munkamenet-védelem és élő óra logika -->
+<script>
+function formatDateForDisplay(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}.${m}.${d}`;
+}
+
+function updateClock() {
+    const now = new Date();
+    const dateStr = formatDateForDisplay(now);
+    const hours = String(now.getHours()).padStart(2, '0');
+    const mins = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById("clockDisplay").innerText = `${dateStr} ${hours}:${mins}`;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Munkamenet védelmi ellenőrzés
+    const currentUser = Auth.requireAuth();
+    if (currentUser) {
+        document.getElementById("userNameDisplay").innerText = currentUser.name;
+    }
+
+    // 2. Óra indítása
+    updateClock();
+    setInterval(updateClock, 10000);
+});
+</script>
 
 </body>
 </html>
