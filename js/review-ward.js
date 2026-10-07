@@ -6,99 +6,119 @@ Fájl:
 review-ward.js
 
 Feladata:
-Az aktuális osztály gyógyszerészi
-ellenőrzésre váró betegeinek
+Az adott napra vonatkozó ÖSSZES OSZTÁLY
+gyógyszerészi ellenőrzésre váró betegeinek
 megjelenítése (Supabase adatbázissal).
 
-Megjeleníti azokat a betegeket,
-akiknek a gyógyszerelése lezárásra
+Megjeleníti azokat a betegeket az összes
+osztályról, akiknek a gyógyszerelése lezárásra
 került (CHECKED státusz).
 
 Fejlesztő:
-Tarszabó Gergely + ChatGPT
+Tarszabó Gergely + ChatGPT + Gemini
 
 Verzió:
-2.0.0
+2.1.0
 =========================================
 */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    loadWard
-);
+const ReviewWard = {
 
-async function loadWard() {
+    async init(targetDate = null) {
+        const queryDate = targetDate || window.selectedWorkDate || Utils.getToday();
+        await this.loadAllWardsForDate(queryDate);
+    },
 
-    const wardCode = Storage.loadCurrentWard ? Storage.loadCurrentWard() : null;
+    async loadAllWardsForDate(dateStr) {
+        // Osztályok aszinkron betöltése a kiválasztott napra Supabase-ből
+        const wards = await Storage.loadWards(dateStr);
 
-    if (!wardCode) {
+        this.renderAllWards(wards);
+    },
 
-        alert("Nincs kiválasztott osztály.");
+    renderAllWards(wards) {
+        // Cím frissítése
+        const wardTitleEl = document.getElementById("wardTitle");
+        if (wardTitleEl) {
+            wardTitleEl.textContent = "Összes osztály – Ellenőrzésre váró betegek";
+        }
 
-        window.location.href = "dashboard.html";
+        // Összes lezárt (CHECKED) beteg kigyűjtése az összes osztályról
+        let allReviewPatients = [];
 
-        return;
+        (wards || []).forEach(ward => {
+            const checkedInWard = (ward.patients || []).filter(
+                patient => patient.status === CONFIG.status.CHECKED
+            ).map(patient => ({
+                ...patient,
+                wardName: ward.wardName || ward.wardCode || "Ismeretlen osztály",
+                wardCode: ward.wardCode
+            }));
 
-    }
+            allReviewPatients = allReviewPatients.concat(checkedInWard);
+        });
 
-    // Osztályok aszinkron betöltése Supabase-ből
-    const wards = await Storage.loadWards();
+        // Betegszámláló kijelzése
+        const patientCountEl = document.getElementById("patientCount");
+        if (patientCountEl) {
+            patientCountEl.textContent = `${allReviewPatients.length} beteg vár ellenőrzésre (${wards.length} osztályon)`;
+        }
 
-    const ward = wards.find(
-        w => w.wardCode === wardCode
-    );
+        const container = document.getElementById("patientContainer");
+        if (!container) return;
 
-    if (!ward) {
+        container.innerHTML = "";
 
-        alert("Az osztály nem található.");
+        if (allReviewPatients.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #777;">
+                    Ezen a napon egyetlen osztályon sincs ellenőrzésre váró beteg.
+                </div>
+            `;
+            return;
+        }
 
-        window.location.href = "dashboard.html";
-
-        return;
-
-    }
-
-    renderWard(ward);
-
-}
-
-function renderWard(ward) {
-
-    document.getElementById(
-        "wardTitle"
-    ).textContent = ward.wardName;
-
-    const reviewPatients = (ward.patients || []).filter(
-        patient => patient.status === CONFIG.status.CHECKED
-    );
-
-    document.getElementById(
-        "patientCount"
-    ).textContent =
-        reviewPatients.length + " beteg vár ellenőrzésre";
-
-    const container = document.getElementById(
-        "patientContainer"
-    );
-
-    container.innerHTML = "";
-
-    reviewPatients.forEach(patient => {
-
-        const card = Render.createPatientCard(patient);
-
-        card.onclick = async () => {
-
-            if (Storage.saveCurrentPatient) {
-                await Storage.saveCurrentPatient(patient.patientId);
+        // Betegkártyák kirajzolása
+        allReviewPatients.forEach(patient => {
+            let card;
+            
+            if (typeof Render !== "undefined" && Render.createPatientCard) {
+                card = Render.createPatientCard(patient);
+            } else {
+                // Biztonsági kártya-generálás, ha a Render modulban nincs elkülönítve
+                card = document.createElement("div");
+                card.className = "patient-card";
+                card.innerHTML = `
+                    <div class="patient-name">${patient.name || 'Ismeretlen beteg'}</div>
+                    <div class="patient-bed">
+                        <strong>Osztály:</strong> ${patient.wardName}<br>
+                        <strong>Ágy/Kórterem:</strong> ${patient.room || patient.bed || '-'}
+                    </div>
+                    <span class="status">Ellenőrzésre vár</span>
+                `;
             }
 
-            location.href = "review.html";
+            card.onclick = async () => {
+                if (Storage.saveCurrentWard) {
+                    await Storage.saveCurrentWard(patient.wardCode);
+                }
+                if (Storage.saveCurrentPatient) {
+                    await Storage.saveCurrentPatient(patient.patientId || patient.id);
+                }
 
-        };
+                window.location.href = "review.html";
+            };
 
-        container.appendChild(card);
+            container.appendChild(card);
+        });
+    }
+};
 
-    });
-
-}
+// Automatikus betöltés oldalindításkor
+document.addEventListener("DOMContentLoaded", async () => {
+    // Ha a review-ward.html nem a saját beépített scriptjével hívja meg
+    if (typeof Auth !== "undefined" && Auth.getCurrentUser) {
+        const queryDate = window.selectedWorkDate || Utils.getToday();
+        await ReviewWard.init(queryDate);
+    }
+});
