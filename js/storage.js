@@ -12,8 +12,18 @@ const Storage = {
     // 1. DASHBOARD & FEJLESZTŐI INTERFÉSZ (loadWards, mergeWard, stb.)
     // =========================================================
 
-    // Osztályok és betegeik betöltése Supabase-ből (vagy helyi tárolóból)
-    async loadWards() {
+    // Osztályok betöltése a created_at dátum alapján
+    async loadWards(targetDate = null) {
+        // Ha nem adtunk meg dátumot, az a mai nap
+        if (!targetDate) {
+            targetDate = Utils.getToday(); // "YYYY.MM.DD" vagy "YYYY-MM-DD"
+        }
+
+        // Dátum formátum egységesítése ISO formátumra (YYYY-MM-DD)
+        const formattedDate = targetDate.replace(/\./g, '-');
+        const startOfDay = `${formattedDate}T00:00:00.000Z`;
+        const endOfDay = `${formattedDate}T23:59:59.999Z`;
+
         const isSupabaseReady = typeof supabase !== "undefined" && 
                                 supabase && 
                                 typeof supabase.from === "function" &&
@@ -25,21 +35,22 @@ const Storage = {
             try {
                 const { data, error } = await supabase
                     .from('wards')
-                    .select('*');
+                    .select('*')
+                    .gte('created_at', startOfDay)
+                    .lte('created_at', endOfDay);
 
                 if (error) {
                     console.error("Hiba a Supabase osztályok lekérésekor:", error);
                 } else if (data) {
-                    // Ha a Supabase-ből sikeresen jött válasz (akár üres, akár tele), azt használjuk!
-                    Utils.log("Osztályok sikeresen betöltve Supabase-ből:", data.length, "db osztály");
+                    Utils.log(`Osztályok betöltve (${formattedDate}):`, data.length, "db osztály");
                     return data;
                 }
             } catch (err) {
-                console.warn("Supabase osztálybetöltési hiba, váltás helyi tárolóra:", err);
+                console.warn("Supabase csatlakozási hiba, váltás helyi tárolóra:", err);
             }
         }
 
-        // Fallback LocalStorage-ra (csak ha a Supabase egyáltalán nem elérhető)
+        // LocalStorage fallback
         const localData = localStorage.getItem(CONFIG.storage.WARDS);
         return localData ? JSON.parse(localData) : [];
     },
