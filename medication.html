@@ -402,9 +402,8 @@ input[type=file]{
 <!-- Alkalmazás modulok -->
 <script src="js/departments.js"></script>
 <script src="js/pdf-import.js"></script>
-<script src="js/dashboard.js"></script>
 
-<!-- Helyi napléptető és óra logika -->
+<!-- Helyi napléptető, óra és PDF import logika -->
 <script>
 let currentDate = new Date();
 
@@ -444,6 +443,32 @@ async function loadDataForSelectedDate() {
     }
 }
 
+async function handlePdfImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    Utils.log("PDF kiválasztva:", file.name);
+
+    try {
+        const ward = await PdfImport.importWardPdf(file);
+
+        if (Storage.mergeWard) {
+            await Storage.mergeWard(ward);
+        }
+
+        // Adatok azonnali újratöltése a kiválasztott napra
+        await loadDataForSelectedDate();
+
+        Utils.log("Osztály sikeresen betöltve:", ward.wardName);
+        
+        // Input ürítése a következő beolvasáshoz
+        event.target.value = "";
+
+    } catch (error) {
+        console.error("Hiba a PDF importálása során:", error);
+    }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
     // 1. Munkamenet védelmi ellenőrzés
     const currentUser = Auth.requireAuth();
@@ -455,7 +480,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateClock();
     setInterval(updateClock, 10000);
 
-    // 3. Dátumléptető események
+    // 3. PDF Input eseményfigyelő
+    const pdfInput = document.getElementById("pdfInput");
+    if (pdfInput) {
+        pdfInput.addEventListener("change", handlePdfImport);
+    }
+
+    // 4. Dátumléptető események
     document.getElementById("prevDayBtn").addEventListener("click", () => {
         currentDate.setDate(currentDate.getDate() - 1);
         loadDataForSelectedDate();
