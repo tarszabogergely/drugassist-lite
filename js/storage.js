@@ -55,27 +55,33 @@ const Storage = {
         return localData ? JSON.parse(localData) : [];
     },
 
-    // PDF Import után osztály összefésülése/mentése
-    async mergeWard(wardData) {
-        if (!wardData) return false;
-
-        // Ellenőrizzük, hogy a Supabase kliens valóban inicializálva van-e
+    async mergeWard(ward) {
         const isSupabaseReady = typeof supabase !== "undefined" && 
                                 supabase && 
                                 typeof supabase.from === "function" &&
+                                typeof CONFIG !== "undefined" &&
+                                CONFIG.supabase?.url &&
                                 !CONFIG.supabase.url.includes("YOUR_SUPABASE");
 
         if (isSupabaseReady) {
             try {
-                const { error } = await supabase
+                const { data, error } = await supabase
                     .from('wards')
-                    .upsert(wardData, { onConflict: 'wardCode' });
+                    .upsert({
+                        wardCode: ward.wardCode,
+                        wardName: ward.wardName,
+                        patients: ward.patients,
+                        created_at: new Date().toISOString()
+                    }, { onConflict: 'wardCode' });
 
-                if (error) console.error("Hiba az osztály Supabase mentésekor:", error);
+                if (error) {
+                    console.error("Hiba az osztály Supabase mentésekor:", error);
+                }
             } catch (err) {
-                console.warn("Supabase mentési hiba, váltás helyi tárolóra:", err);
+                console.error("Supabase mentési hiba:", err);
             }
         }
+    },
 
         // Helyi mentés frissítése (LocalStorage)
         const wards = await this.loadWards();
