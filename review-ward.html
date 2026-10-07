@@ -16,10 +16,10 @@ akiknek a gyógyszerelése
 lezárásra került.
 
 Fejlesztő:
-Tarszabó Gergely + ChatGPT
+Tarszabó Gergely + ChatGPT + Gemini
 
 Verzió:
-1.0.0
+2.1.0
 =========================================
 -->
 
@@ -40,7 +40,7 @@ Verzió:
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
-  
+    
 <style>
 
 body{
@@ -59,7 +59,7 @@ header{
 
     background:white;
 
-    padding:18px 32px;
+    padding:14px 32px;
 
     border-bottom:1px solid #e0e0e0;
 
@@ -77,14 +77,54 @@ header h1{
 
     font-size:22px;
 
+    font-weight:600;
+
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
 .user-info{
 
-    color:#666;
+    color:#2c3e50;
 
     font-size:14px;
 
+    font-weight: 500;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+}
+
+.clock-badge {
+    background: #eef4fb;
+    padding: 6px 12px;
+    border-radius: 8px;
+    color: #2980b9;
+    font-weight: 600;
+}
+
+.logout-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.logout-btn:hover {
+    background: #c0392b;
 }
 
 /* CONTAINER */
@@ -93,6 +133,69 @@ header h1{
 
     padding:32px;
 
+}
+
+/* DATE BAR / DÁTUMLÉPTETŐ */
+
+.date-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    padding: 16px 24px;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+    margin-bottom: 24px;
+}
+
+.date-picker-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.date-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.date-btn:hover {
+    background: #2980b9;
+}
+
+.current-date-display {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
+    min-width: 140px;
+    text-align: center;
+}
+
+.today-btn {
+    background: #ecf0f1;
+    color: #34495e;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.today-btn:hover {
+    background: #bdc3c7;
 }
 
 /* BACK */
@@ -240,8 +343,6 @@ header h1{
 
 }
 
-
-
 </style>
 
 </head>
@@ -252,16 +353,27 @@ header h1{
 
     <h1>DrugAssist</h1>
 
-    <div class="user-info">
-
-        Gergő |
-        2026.06.24
-
+    <div class="header-right">
+        <div class="user-info">
+            <span id="userNameDisplay">Bejelentkezett felhasználó</span>
+            <span id="clockDisplay" class="clock-badge">----.--.-- --:--</span>
+        </div>
+        <button class="logout-btn" onclick="Auth.logout()">Kijelentkezés</button>
     </div>
 
 </header>
 
 <div class="container">
+
+    <!-- DÁTUMLÉPTETŐ PANEL -->
+    <div class="date-bar">
+        <div class="date-picker-group">
+            <button class="date-btn" id="prevDayBtn">&lt;</button>
+            <span class="current-date-display" id="selectedDateDisplay">----.--.--</span>
+            <button class="date-btn" id="nextDayBtn">&gt;</button>
+        </div>
+        <button class="today-btn" id="todayBtn">Mai nap</button>
+    </div>
 
     <div class="back">
 
@@ -292,6 +404,7 @@ header h1{
     </div>
 
     
+
     <div
         class="patient-grid"
         id="patientContainer">
@@ -300,10 +413,19 @@ header h1{
 
 </div>
 
+<!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<!-- Konfiguráció, Hitelesítés és Tároló -->
 <script src="js/config.js"></script>
 
+<script>
+  if (typeof supabase !== 'undefined' && supabase.createClient && CONFIG.supabase.url && !CONFIG.supabase.url.includes("YOUR_SUPABASE")) {
+    window.supabase = supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
+  }
+</script>
+
+<script src="js/auth.js"></script>
 <script src="js/utils.js"></script>
 
 <script src="js/storage.js"></script>
@@ -311,6 +433,78 @@ header h1{
 <script src="js/render.js"></script>
 
 <script src="js/review-ward.js"></script>
+
+<!-- Munkamenet-védelem, óra és napléptető logika -->
+<script>
+let currentDate = new Date();
+
+function formatDateForDisplay(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}.${m}.${d}`;
+}
+
+function formatDateForQuery(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function updateClock() {
+    const now = new Date();
+    const dateStr = formatDateForDisplay(now);
+    const hours = String(now.getHours()).padStart(2, '0');
+    const mins = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById("clockDisplay").innerText = `${dateStr} ${hours}:${mins}`;
+}
+
+async function loadReviewWardForSelectedDate() {
+    const displayStr = formatDateForDisplay(currentDate);
+    const queryStr = formatDateForQuery(currentDate);
+
+    document.getElementById("selectedDateDisplay").innerText = displayStr;
+    
+    // Elérhetővé tesszük a kiválasztott dátumot a review-ward.js számára
+    window.selectedWorkDate = queryStr;
+
+    if (typeof ReviewWard !== "undefined" && typeof ReviewWard.init === "function") {
+        await ReviewWard.init(queryStr);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    // 1. Munkamenet védelmi ellenőrzés
+    const currentUser = Auth.requireAuth();
+    if (currentUser) {
+        document.getElementById("userNameDisplay").innerText = currentUser.name;
+    }
+
+    // 2. Óra indítása
+    updateClock();
+    setInterval(updateClock, 10000);
+
+    // 3. Dátumléptető események
+    document.getElementById("prevDayBtn").addEventListener("click", () => {
+        currentDate.setDate(currentDate.getDate() - 1);
+        loadReviewWardForSelectedDate();
+    });
+
+    document.getElementById("nextDayBtn").addEventListener("click", () => {
+        currentDate.setDate(currentDate.getDate() + 1);
+        loadReviewWardForSelectedDate();
+    });
+
+    document.getElementById("todayBtn").addEventListener("click", () => {
+        currentDate = new Date();
+        loadReviewWardForSelectedDate();
+    });
+
+    // Kezdő dátum (mai nap) betöltése
+    await loadReviewWardForSelectedDate();
+});
+</script>
 
 </body>
 
