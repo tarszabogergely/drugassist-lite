@@ -1,12 +1,12 @@
 <!--
 =========================================
-DrugAssist
+DrugAssist Lite
 
 Fájl:
 dashboard.html
 
 Feladata:
-A DrugAssist kezdőoldala.
+A DrugAssist Lite kezdőoldala.
 
 Lehetővé teszi a gyógyszerelési
 és a gyógyszerészi ellenőrzési
@@ -15,10 +15,10 @@ valamint hozzáférést biztosít
 az alkalmazás további moduljaihoz.
 
 Fejlesztő:
-Tarszabó Gergely + ChatGPT
+Tarszabó Gergely + ChatGPT + Gemini
 
 Verzió:
-1.0.0
+2.1.0
 =========================================
 -->
 
@@ -29,7 +29,7 @@ Verzió:
 
 <meta charset="UTF-8">
 
-<title>DrugAssist</title>
+<title>DrugAssist Lite</title>
 
 <meta
 name="viewport"
@@ -75,6 +75,20 @@ header{
 
     font-weight:600;
 
+    color: #2c3e50;
+
+}
+
+.logo span {
+
+    font-size: 20px;
+
+    font-weight: 400;
+
+    color: #3498db;
+
+    margin-left: 6px;
+
 }
 
 .user-panel{
@@ -86,6 +100,8 @@ header{
 .user-name{
 
     font-weight:600;
+
+    color: #2c3e50;
 
 }
 
@@ -116,6 +132,8 @@ header{
     cursor:pointer;
 
     transition:.2s;
+
+    font-weight: 600;
 
 }
 
@@ -201,6 +219,8 @@ header{
 
     font-weight:600;
 
+    color: #2c3e50;
+
 }
 
 /* ================= MODULES ================= */
@@ -261,6 +281,8 @@ header{
 
     font-weight:600;
 
+    color: #2c3e50;
+
 }
 
 </style>
@@ -273,15 +295,15 @@ header{
 
 <div class="logo">
 
-DrugAssist
+DrugAssist<span>Lite</span>
 
 </div>
 
 <div class="user-panel">
 
-<div class="user-name">
+<div class="user-name" id="userNameDisplay">
 
-Tarszabó Gergely
+Bejelentkezett felhasználó
 
 </div>
 
@@ -297,7 +319,7 @@ Tarszabó Gergely
 
 <button
 class="logout"
-onclick="location.href='index.html'">
+onclick="Auth.logout()">
 
 Kijelentkezés
 
@@ -450,6 +472,21 @@ Beállítások
 
 </div>
 
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Konfiguráció és Hitelesítés modulok -->
+<script src="js/config.js"></script>
+
+<script>
+  if (typeof supabase !== 'undefined' && supabase.createClient && CONFIG.supabase.url && !CONFIG.supabase.url.includes("YOUR_SUPABASE")) {
+    window.supabase = supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
+  }
+</script>
+
+<script src="js/auth.js"></script>
+<script src="js/utils.js"></script>
+
 <script>
 
 function updateDateTime(){
@@ -470,9 +507,17 @@ function updateDateTime(){
 
 }
 
-updateDateTime();
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Munkamenet védelmi ellenőrzés
+    const currentUser = Auth.requireAuth();
+    if (currentUser) {
+        document.getElementById("userNameDisplay").textContent = currentUser.name;
+    }
 
-setInterval(updateDateTime,60000);
+    // 2. Óra és dátum inicializálása
+    updateDateTime();
+    setInterval(updateDateTime, 10000);
+});
 
 </script>
 
